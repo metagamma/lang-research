@@ -3,3 +3,4 @@ El atractor esta en 0.45. Si esto no lo mueve, la hipotesis es falsa.
 
 lex_payoff   coherencia   topsim   exito    por semilla
       0.0   0.467        0.323    0.609    0.398 0.405 0.521 0.495 0.500 0.485
+      0.5   0.409        0.236    0.610    0.480 0.392 0.378 0.415 0.401 0.389

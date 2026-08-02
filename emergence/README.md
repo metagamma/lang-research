@@ -877,6 +877,69 @@ contrario. Lo que importa no es el tamaño del espacio sino su estructura.
 
 ---
 
+### Y sin embargo el marcador BAJO: 14 -> 11
+
+La auditoría de 12 semillas sobre setas da **11/20**, tres menos que
+Uqbar. Los dos criterios que se perseguían cruzaron; se llevaron por
+delante otros cuatro.
+
+| criterio | uqbar | setas |
+|---|---|---|
+| **convencionalidad** | 4/12 | **11/12** ✓ |
+| **composicionalidad** | 9/12 | **11/12** ✓ |
+| creatividad | 12/12 | **0/12** ✗ |
+| variación (dialectos) | 12/12 | 7/12 ✗ |
+| cambio semántico | 12/12 | 6/12 ✗ |
+| arbitrariedad | 9/12 | 7/12 ✗ |
+| morfos por agente | 16.5 | 8.6 |
+
+**Los veinte criterios no son independientes. Coherencia y creatividad se
+estorban.** La lengua de setas converge duro: la mitad de morfos, casi
+todos de acuerdo en casi todo. Con la mitad de palabras hay la mitad de
+combinaciones, y `creatividad` cae de 0.212 a 0.074 — cero de doce. Una
+lengua tan acordada que ya no inventa. Y si todos convergen a lo mismo
+tampoco hay dialectos ni deriva semántica: no queda variación de la que
+el cambio pueda alimentarse.
+
+Uqbar produce una lengua **desordenada y viva**; setas una **acordada y
+quieta**. Ninguna es mejor. Son dos puntos de un compromiso que ninguna
+auditoría anterior había hecho visible, porque nunca se había movido la
+coherencia lo bastante como para ver qué se rompe al otro lado.
+
+Eso hace el 14/20 de Uqbar más frágil de lo que parecía: no es un idioma
+al que le falten seis cosas, es un punto concreto de un tira y afloja
+donde acercarse a un criterio aleja de otros.
+
+*Hipótesis abierta:* con 52 tipos en vez de 17, puede que 55 generaciones
+sean proporcionalmente pocas — los dialectos y el cambio necesitan una
+lengua estable de la que separarse. Comprobable con la misma auditoría a
+130 generaciones.
+
+### La regla 2 no era el precio de nada
+
+`cfg.lex_payoff` (rama `diag/regla2`, NUNCA en la configuración por
+defecto) abre la vía que este proyecto rechazó desde el primer día: que
+el pago recibido refuerce el léxico. Es lo que hace por defecto casi toda
+la literatura de *emergent communication*, y lo que haría circular
+nuestra ablación.
+
+Se probó para falsar una hipótesis: que el atractor de coherencia lo
+producía ese aislamiento.
+
+| `lex_payoff` | coherencia | topsim |
+|---|---|---|
+| 0.0 (regla intacta) | 0.467 | 0.323 |
+| 0.5 (regla rota) | **0.409** | **0.236** |
+
+**Romper la regla no despega la coherencia: la baja**, y hunde la
+composicionalidad. La hipótesis era falsa.
+
+Es el mejor desenlace posible para esa rama. No estábamos pagando
+coherencia a cambio de una ablación limpia: teníamos las dos cosas, y
+romper la regla habría perdido las dos.
+
+---
+
 ### Dónde queda esto frente al estado del arte
 
 Revisión bibliográfica hecha en agosto de 2026, después de medir. No
