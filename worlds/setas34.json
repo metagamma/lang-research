@@ -1,0 +1,1146 @@
+{
+ "name": "setas",
+ "version": 1,
+ "note": "Mundo derivado del Secondary Mushroom Dataset (Wagner, Heider & Hattab; 173 especies del libro de Hardin, CC BY 4.0). Los rasgos sensoriales y el signo del pago salen del dataset; los costes de viaje, la magnitud del pago y los cuatro tipos sinteticos son nuestros y van marcados.",
+ "design": "La trampa no la puse yo: en las familias mixtas conviven comestibles y venenosas que se parecen. Distinguirlas finamente vale la vida, igual que en Uqbar, pero aqui la estructura de parecidos la dicta la micologia.",
+ "fuente": {
+  "dataset": "Secondary Mushroom Dataset",
+  "autores": "D. Wagner, D. Heider, G. Hattab",
+  "licencia": "CC BY 4.0",
+  "url": "https://archive.ics.uci.edu/dataset/848/secondary+mushroom+dataset",
+  "especies_totales": 173
+ },
+ "resumen": {
+  "especies_usadas": 34,
+  "venenosas": 17,
+  "comestibles": 17,
+  "familias_mixtas": 12,
+  "sinteticos": 4
+ },
+ "senses": [
+  [
+   "vista",
+   "luminosidad"
+  ],
+  [
+   "vista",
+   "rojez"
+  ],
+  [
+   "vista",
+   "verdor"
+  ],
+  [
+   "vista",
+   "tamaño"
+  ],
+  [
+   "vista",
+   "altura"
+  ],
+  [
+   "vista",
+   "grosor"
+  ],
+  [
+   "vista",
+   "convexidad"
+  ],
+  [
+   "tacto",
+   "aspereza"
+  ],
+  [
+   "vista",
+   "laminas_claras"
+  ],
+  [
+   "vista",
+   "laminas_juntas"
+  ],
+  [
+   "vista",
+   "anillo"
+  ],
+  [
+   "tacto",
+   "magulla"
+  ]
+ ],
+ "places": [
+  {
+   "name": "bosque",
+   "cost": 3.4,
+   "x": 0.22,
+   "y": 0.78
+  },
+  {
+   "name": "hierbas",
+   "cost": 0.9,
+   "x": 0.44,
+   "y": 0.52
+  },
+  {
+   "name": "prado",
+   "cost": 1.8,
+   "x": 0.68,
+   "y": 0.4
+  },
+  {
+   "name": "hojarasca",
+   "cost": 2.6,
+   "x": 0.3,
+   "y": 0.62
+  },
+  {
+   "name": "senda",
+   "cost": 1.2,
+   "x": 0.56,
+   "y": 0.66
+  },
+  {
+   "name": "brezal",
+   "cost": 4.1,
+   "x": 0.14,
+   "y": 0.3
+  },
+  {
+   "name": "urbano",
+   "cost": 2.0,
+   "x": 0.8,
+   "y": 0.72
+  },
+  {
+   "name": "yermo",
+   "cost": 4.6,
+   "x": 0.86,
+   "y": 0.18
+  }
+ ],
+ "kinds": [
+  {
+   "name": "false_death_cap",
+   "prototype": [
+    0.91,
+    0.6,
+    0.62,
+    0.1212,
+    0.1212,
+    0.1949,
+    0.6,
+    0.3,
+    0.96,
+    0.5,
+    1.0,
+    0.0
+   ],
+   "spread": 0.0601,
+   "affordance": "alimento",
+   "payoff": 3.47,
+   "abundance": 0.32,
+   "especie": "False Death Cap",
+   "familia": "Amanita Family",
+   "fuente": "secondary-mushroom-dataset",
+   "regions": [
+    0
+   ]
+  },
+  {
+   "name": "destroying_angel",
+   "prototype": [
+    0.96,
+    0.5,
+    0.5,
+    0.1414,
+    0.3182,
+    0.1949,
+    0.52,
+    0.26,
+    0.96,
+    0.85,
+    1.0,
+    0.0
+   ],
+   "spread": 0.065,
+   "affordance": "toxico",
+   "payoff": -8.83,
+   "abundance": 0.32,
+   "especie": "Destroying Angel",
+   "familia": "Amanita Family",
+   "fuente": "secondary-mushroom-dataset",
+   "regions": [
+    0
+   ]
+  },
+  {
+   "name": "spring_agaric",
+   "prototype": [
+    0.66,
+    0.56,
+    0.44,
+    0.0808,
+    0.1818,
+    0.1356,
+    0.6,
+    0.3,
+    0.66,
+    0.85,
+    1.0,
+    0.0
+   ],
+   "spread": 0.0589,
+   "affordance": "alimento",
+   "payoff": 3.15,
+   "abundance": 0.48,
+   "especie": "Spring Agaric",
+   "familia": "Bolbitius Family",
+   "fuente": "secondary-mushroom-dataset",
+   "regions": [
+    0,
+    1
+   ]
+  },
+  {
+   "name": "egg_yolk_fungus",
+   "prototype": [
+    0.61,
+    0.66,
+    0.56,
+    0.0303,
+    0.1667,
+    0.0339,
+    0.53,
+    0.14,
+    0.61,
+    0.5,
+    0.0,
+    0.0
+   ],
+   "spread": 0.071,
+   "affordance": "toxico",
+   "payoff": -6.61,
+   "abundance": 0.32,
+   "especie": "Egg Yolk Fungus",
+   "familia": "Bolbitius Family",
+   "fuente": "secondary-mushroom-dataset",
+   "regions": [
+    1
+   ]
+  },
+  {
+   "name": "bay_bolete",
+   "prototype": [
+    0.36,
+    0.62,
+    0.38,
+    0.2121,
+    0.197,
+    0.3644,
+    0.6,
+    0.14,
+    0.86,
+    0.5,
+    0.0,
+    1.0
+   ],
+   "spread": 0.0755,
+   "affordance": "alimento",
+   "payoff": 4.2,
+   "abundance": 0.32,
+   "especie": "Bay Bolete",
+   "familia": "Bolete Family",
+   "fuente": "secondary-mushroom-dataset",
+   "regions": [
+    0
+   ]
+  },
+  {
+   "name": "dotted_stemmed_bolete",
+   "prototype": [
+    0.36,
+    0.62,
+    0.38,
+    0.2727,
+    0.2121,
+    0.4915,
+    0.6,
+    0.16,
+    0.6533,
+    0.5,
+    0.0,
+    1.0
+   ],
+   "spread": 0.0997,
+   "affordance": "toxico",
+   "payoff": -11.45,
+   "abundance": 0.32,
+   "especie": "Dotted-stemmed Bolete",
+   "familia": "Bolete Family",
+   "fuente": "secondary-mushroom-dataset",
+   "regions": [
+    0
+   ]
+  },
+  {
+   "name": "dryad_s_saddle",
+   "prototype": [
+    0.86,
+    0.7,
+    0.74,
+    1.0,
+    0.1364,
+    0.5763,
+    0.5,
+    0.92,
+    0.86,
+    0.5,
+    0.0,
+    0.0
+   ],
+   "spread": 0.1035,
+   "affordance": "alimento",
+   "payoff": 10.5,
+   "abundance": 0.32,
+   "especie": "Dryad's Saddle",
+   "familia": "Bracket Fungi",
+   "fuente": "secondary-mushroom-dataset",
+   "regions": [
+    0
+   ]
+  },
+  {
+   "name": "fuzzy_polypore",
+   "prototype": [
+    0.38,
+    0.735,
+    0.36,
+    0.3737,
+    0.1061,
+    0.661,
+    0.44,
+    0.41,
+    0.86,
+    0.5,
+    0.0,
+    0.0
+   ],
+   "spread": 0.1389,
+   "affordance": "toxico",
+   "payoff": -13.47,
+   "abundance": 0.32,
+   "especie": "Fuzzy Polypore",
+   "familia": "Bracket Fungi",
+   "fuente": "secondary-mushroom-dataset",
+   "regions": [
+    0
+   ]
+  },
+  {
+   "name": "the_miller",
+   "prototype": [
+    0.96,
+    0.5,
+    0.5,
+    0.1313,
+    0.0455,
+    0.1356,
+    0.325,
+    0.46,
+    0.86,
+    0.5,
+    0.0,
+    0.0
+   ],
+   "spread": 0.0645,
+   "affordance": "alimento",
+   "payoff": 3.55,
+   "abundance": 0.42,
+   "especie": "The Miller",
+   "familia": "Entoloma Family",
+   "fuente": "secondary-mushroom-dataset",
+   "regions": [
+    0,
+    1
+   ]
+  },
+  {
+   "name": "white_leptonia",
+   "prototype": [
+    0.96,
+    0.5,
+    0.5,
+    0.0505,
+    0.0455,
+    0.0254,
+    0.325,
+    0.3,
+    0.86,
+    0.25,
+    0.0,
+    0.0
+   ],
+   "spread": 0.0589,
+   "affordance": "toxico",
+   "payoff": -7.01,
+   "abundance": 0.32,
+   "especie": "White Leptonia",
+   "familia": "Entoloma Family",
+   "fuente": "secondary-mushroom-dataset",
+   "regions": [
+    1
+   ]
+  },
+  {
+   "name": "glistening_ink_cap",
+   "prototype": [
+    0.36,
+    0.62,
+    0.38,
+    0.0505,
+    0.1364,
+    0.0339,
+    0.52,
+    0.92,
+    0.21,
+    0.85,
+    0.0,
+    0.0
+   ],
+   "spread": 0.0558,
+   "affordance": "alimento",
+   "payoff": 2.9,
+   "abundance": 0.44,
+   "especie": "Glistening Ink Cap",
+   "familia": "Ink Cap Family",
+   "fuente": "secondary-mushroom-dataset",
+   "regions": [
+    0
+   ]
+  },
+  {
+   "name": "rusty_carpet_ink_cap",
+   "prototype": [
+    0.36,
+    0.62,
+    0.38,
+    0.0606,
+    0.1212,
+    0.0593,
+    0.52,
+    0.92,
+    0.63,
+    0.85,
+    0.0,
+    0.0
+   ],
+   "spread": 0.0576,
+   "affordance": "toxico",
+   "payoff": -7.21,
+   "abundance": 0.32,
+   "especie": "Rusty Carpet Ink Cap",
+   "familia": "Ink Cap Family",
+   "fuente": "secondary-mushroom-dataset",
+   "regions": [
+    0
+   ]
+  },
+  {
+   "name": "parasol_mushroom",
+   "prototype": [
+    0.66,
+    0.56,
+    0.44,
+    0.3434,
+    0.697,
+    0.322,
+    0.6,
+    0.92,
+    0.96,
+    0.5,
+    1.0,
+    0.0
+   ],
+   "spread": 0.1125,
+   "affordance": "alimento",
+   "payoff": 5.25,
+   "abundance": 0.42,
+   "especie": "Parasol Mushroom",
+   "familia": "Lepiota Family",
+   "fuente": "secondary-mushroom-dataset",
+   "regions": [
+    0,
+    2
+   ]
+  },
+  {
+   "name": "stinking_parasol",
+   "prototype": [
+    0.62,
+    0.72,
+    0.365,
+    0.0606,
+    0.0758,
+    0.0424,
+    0.4,
+    0.92,
+    0.66,
+    0.85,
+    1.0,
+    0.0
+   ],
+   "spread": 0.072,
+   "affordance": "toxico",
+   "payoff": -7.21,
+   "abundance": 0.42,
+   "especie": "Stinking Parasol",
+   "familia": "Lepiota Family",
+   "fuente": "secondary-mushroom-dataset",
+   "regions": [
+    0,
+    2
+   ]
+  },
+  {
+   "name": "bleeding_brown_mushroom",
+   "prototype": [
+    0.36,
+    0.62,
+    0.38,
+    0.1919,
+    0.2121,
+    0.2797,
+    0.76,
+    0.73,
+    0.76,
+    0.5,
+    1.0,
+    1.0
+   ],
+   "spread": 0.0671,
+   "affordance": "alimento",
+   "payoff": 4.04,
+   "abundance": 0.36,
+   "especie": "Bleeding Brown Mushroom",
+   "familia": "Mushroom Family",
+   "fuente": "secondary-mushroom-dataset",
+   "regions": [
+    0,
+    3
+   ]
+  },
+  {
+   "name": "yellow_staining_mushroom",
+   "prototype": [
+    0.96,
+    0.5,
+    0.5,
+    0.1414,
+    0.1818,
+    0.2203,
+    0.6,
+    0.92,
+    0.6575,
+    0.5,
+    1.0,
+    1.0
+   ],
+   "spread": 0.0661,
+   "affordance": "toxico",
+   "payoff": -8.83,
+   "abundance": 0.42,
+   "especie": "Yellow-staining Mushroom",
+   "familia": "Mushroom Family",
+   "fuente": "secondary-mushroom-dataset",
+   "regions": [
+    0,
+    1
+   ]
+  },
+  {
+   "name": "coconut_scented_milk_cap",
+   "prototype": [
+    0.5125,
+    0.64,
+    0.405,
+    0.0606,
+    0.0758,
+    0.0847,
+    0.165,
+    0.3,
+    0.76,
+    0.85,
+    0.0,
+    1.0
+   ],
+   "spread": 0.0747,
+   "affordance": "alimento",
+   "payoff": 2.98,
+   "abundance": 0.32,
+   "especie": "Coconut-scented Milk Cap",
+   "familia": "Russula Family",
+   "fuente": "secondary-mushroom-dataset",
+   "regions": [
+    0
+   ]
+  },
+  {
+   "name": "sweet_milk_cap",
+   "prototype": [
+    0.38,
+    0.79,
+    0.26,
+    0.101,
+    0.1212,
+    0.0847,
+    0.05,
+    0.3,
+    0.82,
+    0.85,
+    0.0,
+    1.0
+   ],
+   "spread": 0.0625,
+   "affordance": "toxico",
+   "payoff": -8.02,
+   "abundance": 0.32,
+   "especie": "Sweet Milk Cap",
+   "familia": "Russula Family",
+   "fuente": "secondary-mushroom-dataset",
+   "regions": [
+    0
+   ]
+  },
+  {
+   "name": "brown_stew_fungus",
+   "prototype": [
+    0.36,
+    0.62,
+    0.38,
+    0.101,
+    0.1061,
+    0.0847,
+    0.6,
+    0.02,
+    0.66,
+    0.85,
+    1.0,
+    0.0
+   ],
+   "spread": 0.0641,
+   "affordance": "alimento",
+   "payoff": 3.31,
+   "abundance": 0.44,
+   "especie": "Brown Stew Fungus",
+   "familia": "Stropharia Family",
+   "fuente": "secondary-mushroom-dataset",
+   "regions": [
+    0
+   ]
+  },
+  {
+   "name": "charcoal_pholiota",
+   "prototype": [
+    0.53,
+    0.74,
+    0.4,
+    0.0707,
+    0.0758,
+    0.0847,
+    0.6,
+    0.14,
+    0.36,
+    0.85,
+    1.0,
+    0.0
+   ],
+   "spread": 0.0678,
+   "affordance": "toxico",
+   "payoff": -7.41,
+   "abundance": 0.32,
+   "especie": "Charcoal Pholiota",
+   "familia": "Stropharia Family",
+   "fuente": "secondary-mushroom-dataset",
+   "regions": [
+    0
+   ]
+  },
+  {
+   "name": "greasy_tough_shank",
+   "prototype": [
+    0.55,
+    0.6,
+    0.42,
+    0.1111,
+    0.1515,
+    0.1525,
+    0.44,
+    0.08,
+    0.96,
+    0.85,
+    0.0,
+    0.0
+   ],
+   "spread": 0.0658,
+   "affordance": "alimento",
+   "payoff": 3.39,
+   "abundance": 0.32,
+   "especie": "Greasy Tough Shank",
+   "familia": "Tricholoma Family",
+   "fuente": "secondary-mushroom-dataset",
+   "regions": [
+    3
+   ]
+  },
+  {
+   "name": "club_footed_funnel_cap",
+   "prototype": [
+    0.455,
+    0.56,
+    0.44,
+    0.1111,
+    0.1061,
+    0.1525,
+    0.44,
+    0.3,
+    0.91,
+    0.85,
+    0.0,
+    0.0
+   ],
+   "spread": 0.0602,
+   "affordance": "toxico",
+   "payoff": -8.22,
+   "abundance": 0.42,
+   "especie": "Club-footed Funnel Cap",
+   "familia": "Tricholoma Family",
+   "fuente": "secondary-mushroom-dataset",
+   "regions": [
+    0,
+    3
+   ]
+  },
+  {
+   "name": "herald_of_winter",
+   "prototype": [
+    0.36,
+    0.62,
+    0.38,
+    0.0707,
+    0.1212,
+    0.1102,
+    0.44,
+    0.26,
+    0.7,
+    0.5,
+    0.0,
+    0.0
+   ],
+   "spread": 0.0609,
+   "affordance": "alimento",
+   "payoff": 3.07,
+   "abundance": 0.32,
+   "especie": "Herald of Winter",
+   "familia": "Wax Gill Family",
+   "fuente": "secondary-mushroom-dataset",
+   "regions": [
+    0
+   ]
+  },
+  {
+   "name": "blackening_wax_cap",
+   "prototype": [
+    0.3867,
+    0.7733,
+    0.3533,
+    0.101,
+    0.1515,
+    0.1102,
+    0.56,
+    0.31,
+    0.49,
+    0.5,
+    0.0,
+    0.0
+   ],
+   "spread": 0.0804,
+   "affordance": "toxico",
+   "payoff": -8.02,
+   "abundance": 0.42,
+   "especie": "Blackening Wax Cap",
+   "familia": "Wax Gill Family",
+   "fuente": "secondary-mushroom-dataset",
+   "regions": [
+    1,
+    2
+   ]
+  },
+  {
+   "name": "spruce_milk_cap",
+   "prototype": [
+    0.6733,
+    0.58,
+    0.68,
+    0.1616,
+    0.0909,
+    0.1949,
+    0.05,
+    0.3,
+    0.7,
+    0.5,
+    1.0,
+    1.0
+   ],
+   "spread": 0.0695,
+   "affordance": "toxico",
+   "payoff": -9.23,
+   "abundance": 0.32,
+   "especie": "Spruce Milk Cap",
+   "familia": "Russula Family",
+   "fuente": "secondary-mushroom-dataset",
+   "regions": [
+    0
+   ]
+  },
+  {
+   "name": "turban_fungus",
+   "prototype": [
+    0.38,
+    0.79,
+    0.26,
+    0.1919,
+    0.0455,
+    0.4068,
+    0.5,
+    0.3,
+    0.5,
+    0.5,
+    0.0,
+    0.0
+   ],
+   "spread": 0.0717,
+   "affordance": "toxico",
+   "payoff": -9.84,
+   "abundance": 0.32,
+   "especie": "Turban Fungus",
+   "familia": "Bracket Fungi",
+   "fuente": "secondary-mushroom-dataset",
+   "regions": [
+    0
+   ]
+  },
+  {
+   "name": "changeable_melanoleuca",
+   "prototype": [
+    0.36,
+    0.62,
+    0.38,
+    0.1313,
+    0.1212,
+    0.1525,
+    0.28,
+    0.08,
+    0.96,
+    0.85,
+    0.0,
+    0.0
+   ],
+   "spread": 0.0599,
+   "affordance": "alimento",
+   "payoff": 3.55,
+   "abundance": 0.62,
+   "especie": "Changeable Melanoleuca",
+   "familia": "Tricholoma Family",
+   "fuente": "secondary-mushroom-dataset",
+   "regions": [
+    0,
+    1,
+    2,
+    3
+   ]
+  },
+  {
+   "name": "porcelain_mushroom",
+   "prototype": [
+    0.455,
+    0.56,
+    0.44,
+    0.1111,
+    0.1212,
+    0.0678,
+    0.6,
+    0.14,
+    0.36,
+    0.25,
+    1.0,
+    0.0
+   ],
+   "spread": 0.0694,
+   "affordance": "alimento",
+   "payoff": 3.39,
+   "abundance": 0.38,
+   "especie": "Porcelain Mushroom",
+   "familia": "Tricholoma Family",
+   "fuente": "secondary-mushroom-dataset",
+   "regions": [
+    0
+   ]
+  },
+  {
+   "name": "the_sickener",
+   "prototype": [
+    0.4,
+    0.96,
+    0.14,
+    0.1414,
+    0.1212,
+    0.2797,
+    0.44,
+    0.14,
+    0.96,
+    0.25,
+    0.0,
+    0.0
+   ],
+   "spread": 0.0714,
+   "affordance": "toxico",
+   "payoff": -8.83,
+   "abundance": 0.32,
+   "especie": "The Sickener",
+   "familia": "Russula Family",
+   "fuente": "secondary-mushroom-dataset",
+   "regions": [
+    0
+   ]
+  },
+  {
+   "name": "tufted_bell_cap",
+   "prototype": [
+    0.38,
+    0.79,
+    0.26,
+    0.0404,
+    0.1515,
+    0.0254,
+    0.6,
+    0.74,
+    0.86,
+    0.5,
+    0.0,
+    0.0
+   ],
+   "spread": 0.0627,
+   "affordance": "toxico",
+   "payoff": -6.81,
+   "abundance": 0.32,
+   "especie": "Tufted Bell Cap",
+   "familia": "Tricholoma Family",
+   "fuente": "secondary-mushroom-dataset",
+   "regions": [
+    0
+   ]
+  },
+  {
+   "name": "small_bleeding_bell_cap",
+   "prototype": [
+    0.38,
+    0.79,
+    0.26,
+    0.0101,
+    0.1061,
+    0.0,
+    0.5533,
+    0.74,
+    0.86,
+    0.5,
+    0.0,
+    1.0
+   ],
+   "spread": 0.0649,
+   "affordance": "alimento",
+   "payoff": 2.58,
+   "abundance": 0.42,
+   "especie": "Small Bleeding Bell Cap",
+   "familia": "Tricholoma Family",
+   "fuente": "secondary-mushroom-dataset",
+   "regions": [
+    0,
+    5
+   ]
+  },
+  {
+   "name": "woolly_milk_cap",
+   "prototype": [
+    0.76,
+    0.8,
+    0.44,
+    0.1717,
+    0.1818,
+    0.2373,
+    0.05,
+    0.26,
+    0.76,
+    0.85,
+    1.0,
+    1.0
+   ],
+   "spread": 0.069,
+   "affordance": "toxico",
+   "payoff": -9.43,
+   "abundance": 0.32,
+   "especie": "Woolly Milk Cap",
+   "familia": "Russula Family",
+   "fuente": "secondary-mushroom-dataset",
+   "regions": [
+    0
+   ]
+  },
+  {
+   "name": "shaggy_ink_cap",
+   "prototype": [
+    0.96,
+    0.5,
+    0.5,
+    0.1919,
+    0.5152,
+    0.1949,
+    0.6,
+    0.5,
+    0.5933,
+    0.85,
+    1.0,
+    0.0
+   ],
+   "spread": 0.1058,
+   "affordance": "alimento",
+   "payoff": 4.04,
+   "abundance": 0.64,
+   "especie": "Shaggy Ink Cap",
+   "familia": "Ink Cap Family",
+   "fuente": "secondary-mushroom-dataset",
+   "regions": [
+    0,
+    1,
+    6
+   ]
+  },
+  {
+   "name": "yellow_swamp_russula",
+   "prototype": [
+    0.86,
+    0.7,
+    0.74,
+    0.1313,
+    0.1667,
+    0.2373,
+    0.6,
+    0.14,
+    0.86,
+    0.85,
+    0.0,
+    1.0
+   ],
+   "spread": 0.0746,
+   "affordance": "alimento",
+   "payoff": 3.55,
+   "abundance": 0.32,
+   "especie": "Yellow Swamp Russula",
+   "familia": "Russula Family",
+   "fuente": "secondary-mushroom-dataset",
+   "regions": [
+    0
+   ]
+  },
+  {
+   "name": "depredador_rapido",
+   "affordance": "depredador",
+   "payoff": -24.0,
+   "abundance": 0.3,
+   "spread": 0.07,
+   "prototype": [
+    0.1,
+    0.9,
+    0.05,
+    0.95,
+    0.9,
+    0.95,
+    0.95,
+    0.9,
+    0.1,
+    0.1,
+    0.0,
+    0.95
+   ],
+   "sintetico": true,
+   "fuente": "añadido por nosotros"
+  },
+  {
+   "name": "depredador_lento",
+   "affordance": "depredador",
+   "payoff": -16.0,
+   "abundance": 0.22,
+   "spread": 0.08,
+   "prototype": [
+    0.2,
+    0.75,
+    0.1,
+    0.88,
+    0.75,
+    0.88,
+    0.85,
+    0.8,
+    0.2,
+    0.15,
+    0.0,
+    0.85
+   ],
+   "sintetico": true,
+   "fuente": "añadido por nosotros"
+  },
+  {
+   "name": "agua",
+   "affordance": "agua",
+   "payoff": 4.0,
+   "abundance": 0.7,
+   "spread": 0.05,
+   "prototype": [
+    0.9,
+    0.15,
+    0.2,
+    0.05,
+    0.05,
+    0.05,
+    0.05,
+    0.02,
+    0.9,
+    0.05,
+    0.0,
+    0.05
+   ],
+   "sintetico": true,
+   "fuente": "añadido por nosotros"
+  },
+  {
+   "name": "piedra",
+   "affordance": "inerte",
+   "payoff": 0.0,
+   "abundance": 0.55,
+   "spread": 0.09,
+   "prototype": [
+    0.45,
+    0.48,
+    0.48,
+    0.55,
+    0.1,
+    0.6,
+    0.35,
+    0.7,
+    0.45,
+    0.5,
+    0.0,
+    0.1
+   ],
+   "sintetico": true,
+   "fuente": "añadido por nosotros"
+  }
+ ]
+}
