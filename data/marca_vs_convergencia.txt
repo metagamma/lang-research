@@ -1,0 +1,17 @@
+MARCA frente a CONVERGENCIA — dos fallos distintos que parecen uno
+
+Un morfo puede ir mal por dos motivos: porque casi nadie lo marca
+(morfema cero, que es CORRECTO) o porque quien lo marca no coincide
+con los demas (fallo de convergencia). Se separan.
+
+mundo   valor     %marca   convergencia entre los que marcan
+uqbar   HAY          91%    0.188
+uqbar   COMIO        84%    0.150
+uqbar   DIJO         83%    0.308
+uqbar   antes        84%    0.150
+
+setas   HAY          69%    0.222
+setas   COMIO        90%    0.142
+setas   DIJO         88%    0.313
+setas   antes        90%    0.142
+

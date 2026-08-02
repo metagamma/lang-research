@@ -137,6 +137,8 @@ class Vivo:
         self.tribus_perdidas = []
         self._ultimo_envio = 0.0
         self._ultima_frase = 0.0
+        self._ultimo_suceso = 0.0
+        self._pob_previa = None
 
     # -- grabador de episodios (interfaz de Recorder) -------------------
     def frame(self, gen, tribe, sp, li, rec):
@@ -165,6 +167,7 @@ class Vivo:
         d["p"] = self._posiciones(tribe, sp, li)
         self.bus.publicar("episodio", d)
         self._quiza_frase(ahora, gen, tribe, sp, rec, d)
+        self._quiza_suceso(ahora, gen, tribe, sp, li, rec)
 
     def _quiza_frase(self, ahora, gen, tribe, sp, rec, d):
         """Rescatar una oracion compuesta, segmentada y glosada.
@@ -198,6 +201,64 @@ class Vivo:
             "tiempo": TENSE_NAME.get(m[4], "?"),
             "und": bool(rec.get("understood")),
         })
+
+    def _quiza_suceso(self, ahora, gen, tribe, sp, li, rec):
+        """La cronica: lo que le pasa a alguien, contado.
+
+        Las curvas dicen que el 62% acierta. Esto dice que el agente 14 se
+        intoxico con una seta que su vecino le habia nombrado bien. Son
+        los mismos datos y no cuentan lo mismo: uno se mide, el otro se
+        sigue.
+
+        Se emite como mucho uno cada 400 ms y solo lo que TIENE
+        CONSECUENCIAS — igual que la memoria de los agentes, que tampoco
+        guarda cada arbusto. Un feed que lo cuente todo no lo lee nadie.
+        """
+        if ahora - self._ultimo_suceso < 0.4:
+            return
+        tipo = texto = None
+        cosa = rec.get("kind")
+        nombre = self._nombre_bonito(cosa)
+
+        if rec.get("type") == "alarm":
+            if rec.get("chose_well"):
+                tipo, texto = "huyo", f"{sp} oyó la alarma y huyó"
+            elif rec.get("acted") is False:
+                tipo, texto = "muerte", f"{sp} no huyó a tiempo"
+        elif rec.get("acted") and cosa:
+            if rec.get("chose_well"):
+                tipo, texto = "comio", f"{sp} comió {nombre}"
+                if rec.get("understood"):
+                    texto += f" — se lo dijo {li}"
+            else:
+                tipo, texto = "veneno", f"{sp} se intoxicó con {nombre}"
+                if rec.get("understood"):
+                    texto += f" — y {li} se lo había nombrado"
+        elif rec.get("ensenanza"):
+            tipo = "enseno"
+            texto = f"{sp} le enseñó a {li} cómo se dice {nombre}"
+        elif rec.get("descrito") and rec.get("desc_ok"):
+            tipo = "describio"
+            texto = f"{sp} no sabía la palabra y le describió {nombre} a {li}"
+        elif rec.get("signal") and not rec.get("understood"):
+            tipo = "perdida"
+            texto = f"{sp} dijo «{rec['signal']}» y {li} no lo entendió"
+
+        if tipo is None:
+            return
+        self._ultimo_suceso = ahora
+        self.bus.publicar("suceso", {"g": gen, "t": tribe, "tipo": tipo,
+                                     "texto": texto, "cosa": cosa})
+
+    def _nombre_bonito(self, cosa):
+        """El nombre latente, legible. Es conocimiento NUESTRO, no del
+        agente: va a la cronica porque si no, no hay nada que leer."""
+        if not cosa:
+            return "algo"
+        for k in self.world.kinds:
+            if k.name == cosa:
+                return getattr(k, "especie", None) or cosa.replace("_", " ")
+        return cosa.replace("_", " ")
 
     def _posiciones(self, tribe, sp, li):
         out = {}
@@ -253,6 +314,15 @@ class Vivo:
                                   {"g": self.gen, "tribu": t.index})
 
     def _publicar_generacion(self, acc):
+        pob = len(self.pop.living())
+        if self._pob_previa is not None and pob != self._pob_previa:
+            d = pob - self._pob_previa
+            self.bus.publicar("suceso", {
+                "g": self.gen, "t": -1,
+                "tipo": "nacen" if d > 0 else "mueren",
+                "texto": (f"nacieron {d}" if d > 0 else f"murieron {-d}") +
+                         f" — quedan {pob}"})
+        self._pob_previa = pob
         fila = {"g": self.gen}
         fila.update(self.pop.summary())
         fila.update(acc.rates())

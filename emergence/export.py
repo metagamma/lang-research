@@ -109,12 +109,7 @@ def snapshot(gen, pop, world, rng, rec):
             "coherencia": round(lexical_coherence(vivos, world, rng, 6), 4),
             "nombres": _variantes(vivos, world, rng),
             "orden": _ordenes(vivos),
-            "agentes": [{"id": a.id, "e": round(a.energy, 1), "edad": a.age,
-                         "cats": len(a.concepts), "lex": a.gram.size(),
-                         "vig": round(float(a.vigilance), 3),
-                         "x": round(float(a.pos[0]), 3),
-                         "y": round(float(a.pos[1]), 3)}
-                        for a in vivos],
+            "agentes": [_mente(a) for a in vivos],
         })
     return {
         "g": gen,
@@ -133,6 +128,43 @@ def snapshot(gen, pop, world, rng, rec):
             "alignment", "prediction", "past_rate", "desc_rate",
             "said_composed", "novel_rate", "novel_success",
             "testimony_rate", "quote_rate", "meta_rate", "alarm_rate")},
+    }
+
+
+def _mente(a):
+    """Lo que un agente sabe, y COMO lo sabe.
+
+    La distincion entre lo vivido y lo contado no es un adorno: es la
+    base de media investigacion de este proyecto. `CLAUDE.md` del cliente
+    lo dice explicitamente — aplanarla en un solo numero la haria
+    invisible, y con ella se iria la unica prueba de que hay transmision
+    cultural y no solo experiencia repetida.
+
+    Va por agente y en el mismo sitio que su posicion, para que el visor
+    pueda enseñar una mente entera al pinchar en un punto.
+    """
+    from .syntax import V_CAT
+    voc = a.gram.voc[V_CAT]
+    palabras = sorted(((w, f, c) for (f, c), w in voc.w.items() if w > 0.3),
+                      reverse=True)[:5]
+    valores = sorted(a.value.items(), key=lambda kv: -abs(kv[1]))[:4]
+    return {
+        "id": a.id,
+        "e": round(a.energy, 1),
+        "edad": a.age,
+        "cats": len(a.concepts),
+        "lex": a.gram.size(),
+        "vig": round(float(a.vigilance), 3),
+        "x": round(float(a.pos[0]), 3),
+        "y": round(float(a.pos[1]), 3),
+        # lo que sabe decir: forma -> su propia categoria (un numero suyo,
+        # no un nombre del mundo: el agente no sabe como se llama nada)
+        "dice": [[f, int(c), round(w, 2)] for w, f, c in palabras],
+        # lo que sabe que vale, por experiencia propia
+        "vale": [[int(c), round(v, 1)] for c, v in valores],
+        # COMO lo sabe: vivido frente a contado
+        "viv": len(a.memory.lived),
+        "oid": len(a.memory.told),
     }
 
 

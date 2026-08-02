@@ -19,16 +19,49 @@
 // La regla del CLAUDE.md de esta capa sigue en pie: aquí no se
 // reimplementa nada del modelo. Todo lo que se dibuja llega por el stream.
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
-import { mundo, episodios, instantanea, tic, oraciones, gen }
+import { mundo, episodios, instantanea, tic, oraciones, gen, sucesos, seleccion }
   from '../../core/state.js'
 import Oraciones from '../../components/Oraciones.vue'
+import Cronica from '../../components/Cronica.vue'
+import PanelAgente from '../../components/PanelAgente.vue'
 
 const lienzo = ref(null)
 const verNombres = ref(false)     // los nombres latentes, ocultos por defecto
 const verAgentes = ref(true)
 const verRastro = ref(true)
 const fallo = ref(null)
+const panel = ref('cronica')      // cronica | oraciones
 let raf = null
+
+// El agente elegido se busca en la instantanea por id, no se guarda: asi
+// el panel se actualiza solo cuando llega la siguiente y nunca enseña un
+// estado congelado de hace treinta generaciones.
+const elegido = computed(() => {
+  tic.value
+  const sel = seleccion.value
+  if (!sel) return null
+  const t = (instantanea.value?.tribus || [])[sel.t]
+  const a = (t?.agentes || []).find(x => x.id === sel.id)
+  return a ? { agente: a, tribu: sel.t } : null
+})
+
+// Pinchar cerca de un agente lo abre. La distancia se mide en pixeles
+// para que sea igual de facil acertar con el mapa grande o pequeño.
+function pinchar (ev) {
+  const c = lienzo.value
+  if (!c) return
+  const r = c.getBoundingClientRect()
+  const px = (ev.clientX - r.left) / r.width
+  const py = (ev.clientY - r.top) / r.height
+  let mejor = null, dmin = 0.035
+  ;(instantanea.value?.tribus || []).forEach((t, ti) => {
+    for (const a of (t?.agentes || [])) {
+      const d = Math.hypot(a.x - px, a.y - py)
+      if (d < dmin) { dmin = d; mejor = { id: a.id, t: ti } }
+    }
+  })
+  seleccion.value = mejor
+}
 
 const COLOR = { ok: '#2e9e5b', fallo: '#d98324', perdida: '#8a8f98' }
 const TRIBU = ['#4a7fd4', '#c25bb0', '#e0a03a', '#3fb6a8']
@@ -109,6 +142,12 @@ function dibujar () {
         ctx.globalAlpha = 0.25 + 0.6 * e
         ctx.fill()
         ctx.globalAlpha = 1
+        if (seleccion.value && seleccion.value.id === a.id &&
+            seleccion.value.t === ti) {
+          ctx.beginPath()
+          ctx.arc(X(a.x), Y(a.y), 12 + e * 3, 0, 7)
+          ctx.strokeStyle = '#fff'; ctx.lineWidth = 1.6; ctx.stroke()
+        }
         if (a.edad > 18) {          // los viejos llevan corona
           ctx.beginPath()
           ctx.arc(X(a.x), Y(a.y), 7 + e * 3, 0, 7)
@@ -216,10 +255,21 @@ watch(tic, () => {})
     </p>
 
     <div class="escena">
-      <canvas ref="lienzo"></canvas>
+      <canvas ref="lienzo" @click="pinchar"></canvas>
       <aside>
-        <h3>Lo que se está diciendo</h3>
-        <Oraciones :oraciones="oraciones" />
+        <PanelAgente v-if="elegido" :agente="elegido.agente"
+                     :tribu="elegido.tribu" @cerrar="seleccion = null" />
+        <template v-else>
+          <nav class="sub">
+            <button :class="{ on: panel === 'cronica' }"
+                    @click="panel = 'cronica'">crónica</button>
+            <button :class="{ on: panel === 'oraciones' }"
+                    @click="panel = 'oraciones'">lo que se dice</button>
+          </nav>
+          <Cronica v-show="panel === 'cronica'" :sucesos="sucesos" />
+          <Oraciones v-show="panel === 'oraciones'" :oraciones="oraciones" />
+          <p class="pista">Pincha un agente para abrir su mente.</p>
+        </template>
       </aside>
     </div>
 
@@ -237,8 +287,16 @@ watch(tic, () => {})
 .mundo { display: flex; flex-direction: column; height: 84vh; }
 .escena { flex: 1; display: grid; grid-template-columns: minmax(0, 1fr) 22rem;
           gap: 1rem; min-height: 24rem; }
-aside { overflow-y: auto; padding-right: .3rem; }
+aside { overflow-y: auto; padding-right: .3rem; display: flex;
+        flex-direction: column; gap: .5rem; min-height: 0; }
 aside h3 { font-size: .85rem; margin: 0 0 .5rem; opacity: .8; }
+.sub { display: flex; gap: .3rem; }
+.sub button { background: transparent; color: inherit; cursor: pointer;
+              border: 1px solid rgba(128,128,128,.3); border-radius: 3px;
+              padding: .15rem .55rem; font-size: .76rem; }
+.sub button.on { border-color: currentColor; font-weight: 600; }
+.pista { opacity: .5; font-size: .72rem; margin: auto 0 0; }
+canvas { cursor: crosshair; }
 /* `min-height: 0` sola deja que la fila del grid colapse a cero: el
    lienzo existe, mide 0 y no se ve nada. La altura explicita garantiza
    que siempre haya donde dibujar. */

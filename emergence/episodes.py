@@ -79,6 +79,57 @@ class Channel:
         return s, how
 
 
+def _nombrar_suceso(a, b, act, cfg):
+    """Co-observacion de un SUCESO. Fase 12.
+
+    Los dos acaban de presenciar lo mismo: el otro comio, o el otro se
+    intoxico. Es exactamente la situacion que alinea los NOMBRES —dos
+    agentes mirando la misma cosa, uno la nombra, el otro se queda con la
+    palabra— pero aplicada a lo que pasa, no a lo que hay.
+
+    Que esto faltara era una asimetria del codigo, no una decision. Los
+    sucesos ya se co-observan: `remember()` se llama para los dos. Lo que
+    no ocurria es que ese hecho llegase al lexico de acciones.
+
+    NO SE REGALA NADA. Ambos presenciaron el suceso; ninguno recibe una
+    categoria ni un significado que no tuviera. Lo unico que cruza es la
+    FORMA, igual que con los nombres. Y hablar cuesta energia, asi que el
+    mecanismo tiene precio y puede no compensar.
+
+    Quien habla es el que tiene la asociacion mas firme: si ninguno de los
+    dos tiene morfo para esa accion, uno lo acuña. Asi la palabra para
+    «comio» puede nacer y difundirse por la misma via que la palabra para
+    «seta».
+    """
+    from .syntax import V_ACT
+    voc_a, voc_b = a.gram.voc[V_ACT], b.gram.voc[V_ACT]
+
+    def mejor(voc):
+        f, w = None, 0.0
+        for (forma, val), peso in voc.w.items():
+            if val == act and peso > w:
+                f, w = forma, peso
+        return f, w
+
+    fa, wa = mejor(voc_a)
+    fb, wb = mejor(voc_b)
+    if fa is None and fb is None:
+        fa = voc_a.invent(act)          # nadie tenia palabra: se acuña
+        if fa is None:
+            return False
+        wa = 1.0
+    hablante, oyente, forma = ((a, b, fa) if (wa >= wb or fb is None)
+                               else (b, a, fb))
+    if forma is None:
+        return False
+    if hablante.energy <= cfg.speak_cost:
+        return False
+    hablante.energy -= cfg.speak_cost
+    oyente.gram.voc[V_ACT].reward(forma, act, speaker=hablante.id)
+    hablante.gram.voc[V_ACT].reward(forma, act)
+    return True
+
+
 def _kin_payback(speaker, listener_delta, listener_died, cfg):
     d = cfg.kin_share * listener_delta
     if listener_died:
@@ -281,6 +332,8 @@ def forage_episode(world, speaker, listener, channel, cfg, rng, gen, acc):
         for w, own in ((speaker, cat_s), (listener, cat_l)):
             w.remember(act, own, None, thing.place, gen, abs(thing.payoff))
             w.learn_role(act, 0, thing.payoff)
+        if cfg.p_nombrar_suceso and rng.random() < cfg.p_nombrar_suceso:
+            rec["nombro_suceso"] = _nombrar_suceso(speaker, listener, act, cfg)
     else:
         _uptake_feedback(speaker, form, msg, cfg)
 

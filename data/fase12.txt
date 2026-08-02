@@ -1,0 +1,6 @@
+FASE 12 — co-observacion de sucesos. Sube la sintaxis compleja?
+
+p      conv.verbos  cita entendida  compuestas  coherencia  topsim  exito
+0.00     0.181        0.133           0.192       0.452       0.329   0.618
+0.15     0.434        0.076           0.173       0.451       0.325   0.625
+0.40     0.441        0.101           0.209       0.457       0.334   0.620

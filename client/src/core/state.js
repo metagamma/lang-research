@@ -17,6 +17,8 @@ export const gen = ref(0)
 export const conectado = ref(false)
 export const terminado = ref(null)
 export const oraciones = ref([])   // las ultimas frases glosadas
+export const sucesos = ref([])     // la cronica: lo que le pasa a la gente
+export const seleccion = ref(null) // el agente que se esta mirando
 export const tic = ref(0)          // fuerza redibujado sin reactividad profunda
 
 export const manejadores = {
@@ -35,6 +37,7 @@ export const manejadores = {
   },
   episodio: e => { episodios.push(e); tic.value++ },
   oracion: o => { oraciones.value = [o, ...oraciones.value].slice(0, 12) },
+  suceso: x => { sucesos.value = [x, ...sucesos.value].slice(0, 60) },
   corte: c => { cortes.value = [...cortes.value, c] },
   tribu_perdida: t => { tribusPerdidas.value = [...tribusPerdidas.value, t.tribu] },
   fin: f => { terminado.value = f },

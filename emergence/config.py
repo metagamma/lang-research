@@ -251,6 +251,35 @@ class Config:
     #     cultural no tenia nicho. Con vecindad, el saber se reparte por
     #     geografia. Prediccion: bajara la coherencia global (los juegos de
     #     nombres sobre retículas forman dominios) y apareceran dialectos.
+    p_nombrar_suceso: float = 0.0    # co-observacion de SUCESOS, no solo de cosas
+    #   ^ FASE 12. La asimetria que pone techo a la sintaxis compleja.
+    #
+    #     Medido: los nombres convergen a 0.488 y los verbos a 0.188
+    #     (existencial) y 0.312 (complementante). Y una oracion de cinco
+    #     piezas solo se entiende si TODAS coinciden a la vez, asi que la
+    #     probabilidad es multiplicativa: 0.31 x 0.19 x 0.49 = 0.03. Por
+    #     eso las oraciones de cuatro piezas se entienden y las de cinco
+    #     no. No hay un eslabon roto; el eslabon roto es la multiplicacion.
+    #
+    #     La causa esta en el codigo, no en la teoria. `gram.cat.reward()`
+    #     —los nombres— se llama desde el episodio, cuando los dos agentes
+    #     VEN la cosa. Los verbos solo se refuerzan desde el alineamiento
+    #     interno de la gramatica. Los sucesos SI se co-observan (los dos
+    #     llaman a `remember()` cuando alguien come o se intoxica), pero
+    #     ese hecho no llega al lexico.
+    #
+    #     Esto lo corrige, y solo eso: tras un suceso presenciado por los
+    #     dos, con probabilidad `p_nombrar_suceso` uno emite su morfo para
+    #     esa accion y el otro lo refuerza. Es la MISMA regla que ya rige
+    #     los nombres, aplicada a lo que tambien se ve. No se regala nada:
+    #     ambos presenciaron el suceso, y hablar cuesta energia.
+    #
+    #     APAGADO por defecto. Tiene que ganarse el sitio en un experimento
+    #     que pueda salir mal, y puede salir mal de una forma concreta:
+    #     alinear verbos deberia subir la comprension de oraciones largas,
+    #     pero tambien gasta energia en conversaciones que no informan de
+    #     nada accionable. Si el exito baja, no compensa.
+
     travel_scale: float = 6.0        # de distancia a coste energetico
 
     # --- mundo --------------------------------------------------------
