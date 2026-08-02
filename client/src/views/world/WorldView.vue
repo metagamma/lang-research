@@ -27,6 +27,7 @@ const lienzo = ref(null)
 const verNombres = ref(false)     // los nombres latentes, ocultos por defecto
 const verAgentes = ref(true)
 const verRastro = ref(true)
+const fallo = ref(null)
 let raf = null
 
 const COLOR = { ok: '#2e9e5b', fallo: '#d98324', perdida: '#8a8f98' }
@@ -67,13 +68,19 @@ function dibujar () {
   const ctx = c.getContext('2d')
   const w = c.width = c.clientWidth
   const h = c.height = c.clientHeight
-  ctx.clearRect(0, 0, w, h)
+  // Sin tamaño no hay nada que dibujar. Pasa en el primer cuadro, antes
+  // de que el layout se asiente: dibujar entonces no falla, pero
+  // `createRadialGradient` con NaN SI lanza, y una excepcion aqui mata
+  // el bucle de animacion para siempre.
+  if (!w || !h) return
+  const num = v => Number.isFinite(v)
   const X = x => x * w, Y = y => y * h
 
   // --- lugares -------------------------------------------------------
   ctx.font = '11px system-ui'
-  for (const p of mundo.value.places) {
-    const r = 26 + p.cost * 5
+  for (const p of mundo.value.places || []) {
+    if (!num(p.x) || !num(p.y)) continue
+    const r = 26 + (num(p.cost) ? p.cost : 1) * 5
     const g = ctx.createRadialGradient(X(p.x), Y(p.y), 2, X(p.x), Y(p.y), r)
     g.addColorStop(0, 'rgba(128,128,128,.10)')
     g.addColorStop(1, 'rgba(128,128,128,0)')
@@ -94,7 +101,7 @@ function dibujar () {
     tribus.forEach((t, ti) => {
       if (!t) return
       for (const a of t.agentes || []) {
-        if (a.x == null) continue
+        if (!num(a.x) || !num(a.y)) continue
         const e = Math.max(0, Math.min(1, a.e / 40))
         ctx.beginPath()
         ctx.arc(X(a.x), Y(a.y), 3 + e * 4, 0, 7)
@@ -119,7 +126,7 @@ function dibujar () {
   recientes.forEach((e, i) => {
     if (!e.p) return
     const a = e.p[e.sp], b = e.p[e.li]
-    if (!a || !b) return
+    if (!a || !b || !num(a[0]) || !num(a[1]) || !num(b[0]) || !num(b[1])) return
     const alfa = (1 - i / N) * 0.9
     ctx.globalAlpha = alfa
 
@@ -159,7 +166,18 @@ function dibujar () {
   ctx.globalAlpha = 1
 }
 
-function bucle () { dibujar(); raf = requestAnimationFrame(bucle) }
+// El bucle NO puede morir. Si `dibujar` lanza, se anota el fallo, se
+// enseña en pantalla y se sigue pidiendo cuadros: un lienzo en blanco sin
+// explicacion es el peor resultado posible para un visor.
+function bucle () {
+  try {
+    dibujar()
+    if (fallo.value) fallo.value = null
+  } catch (err) {
+    fallo.value = String(err && err.message || err)
+  }
+  raf = requestAnimationFrame(bucle)
+}
 onMounted(() => { raf = requestAnimationFrame(bucle) })
 onUnmounted(() => cancelAnimationFrame(raf))
 watch(tic, () => {})
@@ -190,6 +208,13 @@ watch(tic, () => {})
       <small>en los últimos {{ pulso.n }} episodios</small>
     </div>
 
+    <p v-if="fallo" class="fallo">
+      El lienzo falló al dibujar: <code>{{ fallo }}</code>
+    </p>
+    <p v-else-if="!mundo" class="fallo">
+      Sin datos del mundo todavía — <code>/world</code> no ha respondido.
+    </p>
+
     <div class="escena">
       <canvas ref="lienzo"></canvas>
       <aside>
@@ -210,11 +235,15 @@ watch(tic, () => {})
 
 <style scoped>
 .mundo { display: flex; flex-direction: column; height: 84vh; }
-.escena { flex: 1; display: grid; grid-template-columns: 1fr 22rem;
-          gap: 1rem; min-height: 0; }
+.escena { flex: 1; display: grid; grid-template-columns: minmax(0, 1fr) 22rem;
+          gap: 1rem; min-height: 24rem; }
 aside { overflow-y: auto; padding-right: .3rem; }
 aside h3 { font-size: .85rem; margin: 0 0 .5rem; opacity: .8; }
-canvas { min-height: 0; border: 1px solid rgba(128,128,128,.25); border-radius: 6px; }
+/* `min-height: 0` sola deja que la fila del grid colapse a cero: el
+   lienzo existe, mide 0 y no se ve nada. La altura explicita garantiza
+   que siempre haya donde dibujar. */
+canvas { width: 100%; height: 100%; min-height: 24rem; display: block;
+         border: 1px solid rgba(128,128,128,.25); border-radius: 6px; }
 .barra { display: flex; gap: 1.1rem; align-items: center; margin-bottom: .4rem;
          font-size: .82rem; flex-wrap: wrap; }
 .leyenda { margin-left: auto; opacity: .8; }
@@ -228,4 +257,6 @@ canvas { min-height: 0; border: 1px solid rgba(128,128,128,.25); border-radius: 
 .pulso span { font-size: .7rem; opacity: .6; }
 .pulso small { margin-left: auto; opacity: .5; font-size: .72rem; }
 .nota { opacity: .62; font-size: .8rem; }
+.fallo { border-left: 3px solid #c0392b; padding-left: .7rem; font-size: .82rem; }
+.fallo code { font-size: .78rem; opacity: .85; }
 </style>

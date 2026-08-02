@@ -1,3 +1,5 @@
 UQBAR (inventado) contra SETAS (dataset real) — 6 semillas x 55 gen
 
 mundo   coherencia   topsim   exito    lex    por semilla
+uqbar   0.452        0.329    0.618    111.5  0.410 0.502 0.535 0.426 0.452 0.386
+setas   0.695        0.448    0.703     54.8  0.659 0.853 0.498 0.784 0.656 0.721

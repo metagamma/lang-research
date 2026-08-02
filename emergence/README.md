@@ -807,6 +807,19 @@ media, es **la dispersión entre semillas**: 0.125 a las 55 generaciones,
 El sistema no se queda corto de 0.45: converge a 0.45 desde arriba y desde
 abajo. Es un atractor, no un límite.
 
+**Corrección importante, medida después.** La medición de arriba es
+correcta; la atribución que le puse no lo era. Escribí «el sistema»
+cuando los datos solo autorizaban a decir «el sistema *en Uqbar*». Es un
+atractor de ESE MUNDO — el que diseñé yo —, no del modelo. Ver la sección
+del mundo de setas, más abajo: con un mundo derivado de datos reales la
+coherencia sube a 0.695 con seis semillas.
+
+Toda esta serie de intentos fallidos probó mecanismos contra un techo sin
+que se me ocurriera que el techo pudiera estar en el mundo, porque el
+mundo era mío y no lo puse en duda. Es el mismo error que este README
+documenta en otros dos sitios: confundir una propiedad de la
+configuración con una propiedad del modelo.
+
 Eso reinterpreta toda la serie de intentos fallidos. El cuello de botella,
 la amplificación de mayorías y las dos variantes de mundo pequeño no
 fracasaron por ser débiles — fracasaron porque existe una fuerza que
@@ -819,6 +832,48 @@ que empuja hacia el acuerdo es la co-observación, que tiene alcance local
 fijo. El equilibrio entre esa presión y la deriva de variantes nuevas cae
 en 0.45. Si es cierto, el 0.45 no es un defecto del modelo: es el precio
 de la regla que hace que la ablación signifique algo.
+
+---
+
+### El mundo importaba más que el modelo
+
+`python worlds/build_setas.py && python -m emergence.run sim --world setas`
+
+Uqbar lo diseñé a mano con un principio: «cada familia contiene una
+trampa». Resulta que eso es micología. El **Secondary Mushroom Dataset**
+(Wagner, Heider & Hattab; 173 especies del libro de Hardin, CC BY 4.0)
+trae para cada especie sus rangos de rasgos físicos y si es comestible o
+venenosa. En *Amanita* conviven la oronja y la phalloides, y confundirlas
+es la primera causa de muerte por setas en Europa.
+
+`worlds/build_setas.py` convierte eso en un mundo: 12 dimensiones
+sensoriales, todas propiedades medibles (diámetro del sombrero en cm,
+color convertido a luminosidad/rojez/verdor, si magulla al tocarla), 8
+hábitats reales, y el signo del pago según la clase. La regla 1 se
+respeta: el mundo sigue conteniendo física, nunca significados. Lo que no
+sale del dataset —costes de viaje, magnitud del pago, y cuatro tipos
+sintéticos para que haya depredador y agua— va marcado como tal en el
+JSON.
+
+| mundo | tipos | sentidos | coherencia | topsim | aciertos | léxico |
+|---|---|---|---|---|---|---|
+| uqbar (inventado) | 17 | 9 | 0.452 | 0.329 | 0.618 | 111.5 |
+| **setas (datos reales)** | **52** | **12** | **0.695** | **0.448** | **0.703** | **54.8** |
+
+Seis semillas cada uno, 55 generaciones. Cinco de las seis semillas de
+setas superan a la mejor de Uqbar. Es +0.24 de coherencia, cuando todo lo
+demás que se probó en esa sesión se movía en ±0.02.
+
+**Hipótesis del porqué, sin medir todavía:** un espacio sensorial con
+GRUMOS se nombra mejor que uno uniforme. En Uqbar repartí los prototipos
+a mano y quedaron más o menos equidistantes; las setas reales forman
+familias con parecidos internos fuertes y huecos entre familias. Las
+fronteras están donde el mundo las pone, así que todos los agentes las
+encuentran en el mismo sitio. Encaja con que el léxico sea la mitad de
+grande: menos palabras, mejor repartidas.
+
+Más tipos y más dimensiones deberían dificultar la convergencia. Hacen lo
+contrario. Lo que importa no es el tamaño del espacio sino su estructura.
 
 ---
 
