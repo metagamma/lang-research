@@ -52,7 +52,21 @@ class Config:
     #     de verdad: por numero de hablantes, no por frecuencia bruta.
     lex_prune: float = 0.05          # peso por debajo del cual se olvida
     lex_confidence: float = 0.55     # peso minimo para fiarse de lo que oyes
-    pragmatica: float = 0.6          # cuanto pesa el contexto al desambiguar
+    pragmatica: float = 0.0          # cuanto pesa el contexto al desambiguar
+    #   ^ APAGADO por defecto, y por medicion propia. Con 0.6 la
+    #     desambiguacion contextual registra 0.017 (SI en 0/12 semillas)
+    #     mientras degrada tres criterios que si funcionaban:
+    #     convencionalidad 6/12 -> 3/12, composicionalidad 9/12 -> 5/12,
+    #     arbitrariedad 10/12 -> 8/12. El marcador global cae de 14/20 a
+    #     12/20. El mecanismo se queda —es correcto y esta documentado—
+    #     pero encenderlo empeora el modelo, y eso pesa mas que tener un
+    #     criterio mas en PARCIAL.
+    #
+    #     La causa, medida: la polisemia de este modelo es NOMINAL. La
+    #     brecha media entre la 1a y la 2a acepcion es 0.341 y solo el
+    #     34.5% de los pares estan lo bastante parejos para que el
+    #     contexto pudiera voltearlos. Sin ambigüedad real no hay nada
+    #     que desambiguar.
     contexto_min: int = 12           # observaciones minimas para opinar del sitio
     #   ^ FASE 10. Una forma polisemica no significa siempre lo mismo: el
     #     oyente sabe DONDE esta pasando la conversacion, y sabe por
