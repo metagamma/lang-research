@@ -56,9 +56,10 @@ class Config:
     #   ^ APAGADO por defecto, y por medicion propia. Con 0.6 la
     #     desambiguacion contextual registra 0.017 (SI en 0/12 semillas)
     #     mientras degrada tres criterios que si funcionaban:
-    #     convencionalidad 6/12 -> 3/12, composicionalidad 9/12 -> 5/12,
-    #     arbitrariedad 10/12 -> 8/12. El marcador global cae de 14/20 a
-    #     12/20. El mecanismo se queda —es correcto y esta documentado—
+    #     arbitrariedad (SI en 8/12 con ella, 9/12 sin ella) y
+    #     composicionalidad (5/12 -> 8/12). Medido con dos auditorias de
+    #     12 semillas sobre el MISMO codigo: 12/20 encendida, 13/20
+    #     apagada. El mecanismo se queda —es correcto y esta documentado—
     #     pero encenderlo empeora el modelo, y eso pesa mas que tener un
     #     criterio mas en PARCIAL.
     #

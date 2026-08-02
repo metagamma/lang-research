@@ -690,6 +690,72 @@ orden de los ARGUMENTOS, no la posicion de los adjuntos.
 
 ---
 
+## La carta de la lengua
+
+`python -m emergence.run audit --seeds 12`
+
+El informe pasa la lista de criterios que un lingüista pediría para llamar
+«lengua» a un sistema. El veredicto agregado exige **SÍ en ≥70% de las
+corridas**: un criterio que sale bien en la mitad no está cumplido, es uno
+que depende de la semilla.
+
+**13 de 20 con evidencia, 5 parciales, 2 no cumplidos** (12 semillas,
+Uqbar de 17 tipos, banda 8).
+
+| criterio | valor | consistencia |
+|---|---|---|
+| inventario de unidades | 30 | 12/12 |
+| doble articulación | 101.1 ± 12.2 | 12/12 |
+| léxico | 16.0 ± 2.1 | 12/12 |
+| morfología | 0.906 | 12/12 |
+| **sintaxis (SVO convergente)** | **1.000 ± 0.000** | **12/12** |
+| productividad | 2796 significados | 12/12 |
+| desplazamiento | 0.324 | 12/12 |
+| saber transmitido | 0.236 | 12/12 |
+| variación (dialectos) | 1.000 | 12/12 |
+| cambio semántico | 9.2 palabras | 12/12 |
+| transmisión cultural | — | 12/12 |
+| creatividad | 0.210 | 11/12 |
+| arbitrariedad | +0.109 | 9/12 |
+| *composicionalidad* | 0.326 | 8/12 |
+| *polisemia* | 1.053 | 6/12 |
+| *convencionalidad* | 0.475 | 1/12 |
+| *recursividad* | 0.058 | 0/12 |
+| *metalingüística* | 0.054 | 0/12 |
+| **pragmática** | **0.000** | **0/12** |
+| **orden de circunstanciales** | **0.000** | **0/12** |
+
+### Los siete que faltan, y por qué
+
+**Seis cuelgan del mismo cuello.** Recursividad, metalingüística,
+convencionalidad, composicionalidad, polisemia y arbitrariedad dependen de
+la convergencia léxica, que se estanca en ~0.47. Los mecanismos están
+construidos y son correctos — pero **un morfo nuevo solo converge si entra
+en el circuito de co-observación que alinea los nombres**, y el
+complementante, los adjetivos y la marca metalingüística no entran nunca.
+Comprobado seis veces con seis mecanismos distintos.
+
+**La pragmática tiene un impedimento propio.** La polisemia de este modelo
+es *nominal*: la brecha media entre la primera y la segunda acepción es
+0.341, y solo el 34.5% de los pares están lo bastante parejos para que el
+contexto pudiera voltearlos. Sin ambigüedad real no hay nada que
+desambiguar, y subir el peso del contexto hasta que aparezca el número
+sería fabricar el resultado.
+
+**Y uno lo puse yo.** El orden de los circunstanciales: lugar y tiempo van
+siempre al final porque lo fijé al diseñar la Fase 6. No emerge, y contarlo
+como sintaxis emergente sería mentir.
+
+### Una corrección
+
+En su momento afirmé que apagar la pragmática «devuelve el marcador a
+14/20». Devuelve **13**. Ese 14 salía de una auditoría anterior sobre un
+código que ya no existía: era una extrapolación presentada como medición.
+Las dos auditorías comparables, sobre el mismo código, dan 12/20 con
+pragmática y 13/20 sin ella.
+
+---
+
 ## Honestidad sobre los límites
 
 Cosas que este modelo **no** hace, y que no conviene confundir con lo que
