@@ -787,6 +787,41 @@ código que ya no existía: era una extrapolación presentada como medición.
 Las dos auditorías comparables, sobre el mismo código, dan 12/20 con
 pragmática y 13/20 sin ella.
 
+### El 0.47 no es un techo: es un atractor
+
+La pregunta que faltaba por hacer, y que se hizo la última: **¿y si 55
+generaciones son sencillamente pronto?** En los juegos de nombres el
+tiempo hasta el acuerdo escala como N^1.4; toda auditoría de este repo
+corre 55 generaciones y nadie había comprobado que eso bastara.
+
+| generaciones | coherencia | topsim | por semilla |
+|---|---|---|---|
+| 55 | 0.483 | 0.377 | 0.410 · 0.502 · 0.535 |
+| 110 | 0.496 | 0.342 | 0.494 · 0.442 · 0.552 |
+| 220 | 0.453 | 0.342 | **0.452 · 0.449 · 0.457** |
+
+Cuadruplicar el tiempo no sube la coherencia. Pero lo revelador no es la
+media, es **la dispersión entre semillas**: 0.125 a las 55 generaciones,
+**0.005** a las 220. Y la semilla que estaba en 0.535 *bajó* a 0.457.
+
+El sistema no se queda corto de 0.45: converge a 0.45 desde arriba y desde
+abajo. Es un atractor, no un límite.
+
+Eso reinterpreta toda la serie de intentos fallidos. El cuello de botella,
+la amplificación de mayorías y las dos variantes de mundo pequeño no
+fracasaron por ser débiles — fracasaron porque existe una fuerza que
+devuelve el sistema a 0.45 haga lo que haga el mecanismo. Explica que tres
+auditorías de 12 semillas dieran 0.475, 0.473 y 0.469.
+
+**Hipótesis del mecanismo, sin medir todavía:** es la regla 2 del proyecto.
+El léxico está deliberadamente aislado de la recompensa, así que lo único
+que empuja hacia el acuerdo es la co-observación, que tiene alcance local
+fijo. El equilibrio entre esa presión y la deriva de variantes nuevas cae
+en 0.45. Si es cierto, el 0.45 no es un defecto del modelo: es el precio
+de la regla que hace que la ablación signifique algo.
+
+---
+
 ### Dónde queda esto frente al estado del arte
 
 Revisión bibliográfica hecha en agosto de 2026, después de medir. No

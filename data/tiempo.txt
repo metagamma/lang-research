@@ -1,0 +1,5 @@
+COHERENCIA CONTRA TIEMPO — el 0.47 es techo o es pronto?
+gen   coherencia          topsim   por semilla
+  55  0.483  0.377   0.410 0.502 0.535
+ 110  0.496  0.342   0.494 0.442 0.552
+ 220  0.453  0.342   0.452 0.449 0.457
