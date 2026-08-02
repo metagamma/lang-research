@@ -226,7 +226,8 @@ class Agent:
         if self.rng.random() >= self.cfg.p_describe:
             return None
         piezas, _ = describir(self.gram, self.concepts.protos[cat], ref,
-                              min_n=self.cfg.describe_min_morphs)
+                              min_n=self.cfg.describe_min_morphs,
+                              refina=self.cfg.desc_refina)
         return "".join(piezas) if len(piezas) >= 2 else None
 
     def understand_description(self, cadena, ref, medio):

@@ -198,11 +198,26 @@ def restricciones(gram, ref, min_n=20, umbral=0.45, max_dims=3):
     return out
 
 
-def describir(gram, prototipo, ref, n_piezas=3, min_n=20):
+def describir(gram, prototipo, ref, n_piezas=3, min_n=20, refina=0.5):
     """Los morfos atributivos que mejor describen este prototipo.
 
-    Se eligen por cercania en las dimensiones que cada uno restringe, y se
-    evita repetir dimension: decir dos veces lo mismo no añade nada.
+    Se eligen por cercania en las dimensiones que cada uno restringe.
+
+    SOBRE REPETIR DIMENSION. La primera version rechazaba cualquier morfo
+    que tocara una dimension ya cubierta, razonando que «decir dos veces
+    lo mismo no añade nada». Es cierto si los dos dicen lo mismo — pero
+    medido resulto ser la condicion que mas descripciones mataba: 1.99
+    candidatas descartadas por llamada frente a 0.70 del filtro de
+    distancia, y el 16% de TODOS los casos eran «tenia una pieza y la
+    segunda choco de dimension».
+
+    Con 9 dimensiones y ~4 candidatas, lo que pasa casi siempre no es
+    redundancia sino REFINAMIENTO: «lo verde» y «lo muy verde» tocan la
+    misma dimension con valores distintos, y descartar el segundo no
+    evitaba decir dos veces lo mismo, quitaba precision.
+
+    Ahora se rechaza solo si el valor que aporta esta CERCA del ya
+    cubierto (a menos de `refina` desviaciones). Si lo afina, entra.
     """
     cand = restricciones(gram, ref, min_n)
     if not cand:
@@ -215,10 +230,16 @@ def describir(gram, prototipo, ref, n_piezas=3, min_n=20):
     puntuadas.sort(key=lambda t: t[0])
     usadas, piezas, total = set(), [], {}
     for err, pieza, cons in puntuadas:
-        if err > 1.0 or set(cons) & usadas:
+        if err > 1.0:
+            continue
+        aporta = any(d not in total
+                     or abs(v - total[d]) / max(ref[d], 1e-9) > refina
+                     for d, v in cons.items())
+        if not aporta:
             continue
         piezas.append(pieza)
-        total.update(cons)
+        for d, v in cons.items():
+            total.setdefault(d, v)     # la primera fija; las demas afinan
         usadas |= set(cons)
         if len(piezas) >= n_piezas:
             break

@@ -69,6 +69,11 @@ class Config:
     #     categoria no llega a `lex_confidence`. Es lo que uno hace cuando
     #     no sabe como se llama algo: enumerar como es.
     describe_min_morphs: int = 20    # co-observaciones para fiarse de una nube
+    desc_refina: float = 0.5         # cuanto debe AFINAR un morfo repetido
+    #   ^ un segundo morfo sobre la misma dimension entra si aporta un
+    #     valor distinto (mas de 0.5 desviaciones). A 0 se admite todo y
+    #     vuelven las descripciones tautologicas; muy alto equivale a la
+    #     condicion vieja, que mataba el 16% de todas las descripciones.
     described_radius: float = 1.5    # el radio de un concepto oido, x vigilancia
     #   ^ ancho a proposito: un concepto que llega por el oido esta
     #     infra-especificado y no debe competir de tu a tu con los vistos.

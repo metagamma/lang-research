@@ -309,6 +309,93 @@ bloqueada por otra cosa, y no sé cuál.
 Y el óptimo no es el máximo: a `e=0.8` la coherencia sube algo más pero
 los aciertos bajan y la ganancia de composicionalidad desaparece.
 
+### Fase 8 — descripción: dar el concepto, no solo su valor
+
+Una sonda midió la forma de la nube sensorial de cada morfo — con qué
+cosas aparece — y separó tres poblaciones sin declarar categorías
+gramaticales: **estrecha en todo** = nombra una cosa; **estrecha en una
+dimensión, ancha en el resto** = nombra una propiedad; **ancha en todo** =
+lugar, acción, tiempo.
+
+Predije que no habría adjetivos. **Los había**: 41 morfos (18.1%)
+restringiendo una sola dimensión — `'ii'` y `'nu'` el *verdor*, `'ud'` la
+*temperatura*. Son subproducto accidental de la metáfora de la Fase 4:
+estirar una palabra hacia un concepto vecino produce una que cubre la
+región donde ambos coinciden.
+
+Sobre eso se montó describir (`agent.describe`), entender
+(`understand_description`) e instalar un concepto oído
+(`ConceptSpace.install_described`) — provisional, porque un concepto que
+llega por el oído es una **hipótesis perceptiva** que el mundo puede
+desmentir.
+
+**Funciona de punta a punta y se usa poco**: descripciones en el ~4% de
+los episodios, comprensión 7-11%.
+
+### Fase 9 — espacio
+
+Los lugares dejan de ser un coste escalar y pasan a tener coordenadas.
+Los agentes tienen posición y derivan; **con quién te cruzas depende de
+dónde estás**; y algunos tipos solo crecen en ciertas regiones.
+
+Predicciones dichas de antemano, y lo que pasó:
+
+| predicción | resultado |
+|---|---|
+| la coherencia global baja | ✅ 0.640 → **0.431** |
+| aparece transmisión cultural | ❌ no |
+| dialectos intra-tribu | sin medir |
+
+Y algo no predicho: los **aciertos subieron** (0.618 → 0.627).
+
+**El mecanismo funcionó; la consecuencia no.** La partición del saber
+apareció con fuerza — de 13 de 16 agentes con experiencia directa del
+veneno se pasó a **3 de 16**. Pero el testimonio sigue sin transmitir
+nada, porque los que no han pisado el bosque **no tienen concepto** donde
+poner lo que se les cuente.
+
+---
+
+## Lo que no funcionó, y por qué
+
+Media investigación de este repo son resultados negativos. Están aquí
+porque cada uno acota algo.
+
+**El canal de alarma no emerge.** Siete fases, un mundo nuevo, toda la
+maquinaria de sucesos: las muertes por depredador son idénticas en los
+tres brazos. *Una señal solo se estabiliza si la situación se repite lo
+bastante frente al relevo generacional.* El modelo lexicaliza bien lo
+cotidiano y mal lo raro-y-letal.
+
+**La transmisión cultural no ocurre.** Cuatro intentos:
+
+| intento | por qué falló |
+|---|---|
+| tóxicos normales | todos los viven; el testimonio no tiene nicho |
+| veneno raro (abundancia 0.06) | **manipulación fallida**: 13/16 lo vivían igual |
+| veneno raro (0.01, dosis correcta) | nadie tiene concepto donde ponerlo |
+| espacio (Fase 9) | partición lograda (3/16), pero el concepto sigue faltando |
+
+De ahí sale la frase que resume el alcance del modelo:
+
+> Puede decirte **cuánto vale** algo de lo que ya tienes concepto.
+> No puede darte el **concepto**.
+
+**Cinco hipótesis mías refutadas por los datos** sobre el techo de
+coherencia y las descripciones: auto-refuerzo de la palabra propia,
+divergencia conceptual, ruido de inducción, dos fuerzas incompatibles
+(espacio contra coherencia), y el solapamiento adjetival como cuello.
+
+La sexta funcionó, y salió de **medir la distribución de variantes** en
+vez de razonar. El patrón es tan consistente que vale como método: en
+este proyecto la intuición ha fallado y la instrumentación ha acertado.
+
+**Y un error de lectura que cometí dos veces**: confundir *el eslabón con
+más bajas* con *el eslabón limitante*. El choque de dimensión mataba el
+16% de las descripciones y arreglarlo no cambió casi nada — porque con
+3.89 candidatas por llamada, liberar el filtro más frecuente no libera
+mucho.
+
 ### El tamaño de la banda manda
 
 El resultado mas solido de todo el proyecto, y el que menos esperaba:
