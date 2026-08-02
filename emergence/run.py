@@ -603,6 +603,21 @@ def main(argv=None):
                    help="señales enteras que caben en memoria (0 = infinita)")
     _add_config_args(b, cfg)
 
+    lv = sub.add_parser("live", help="correr indefinidamente y emitir en vivo")
+    lv.add_argument("--port", type=int, default=8080)
+    lv.add_argument("--tribes", type=int, default=2)
+    lv.add_argument("--seed", type=int, default=3)
+    lv.add_argument("--eps", type=int, default=30,
+                    help="episodios por segundo emitidos a la vista de mundo")
+    lv.add_argument("--snap-every", type=int, default=10)
+    _add_config_args(lv, cfg)
+
+    au = sub.add_parser("audit", help="la carta de la lengua, N semillas")
+    au.add_argument("--tribes", type=int, default=2)
+    au.add_argument("--generations", type=int, default=55)
+    au.add_argument("--seeds", type=int, default=12)
+    _add_config_args(au, cfg)
+
     ex = sub.add_parser("export", help="volcar una corrida para el visor web")
     ex.add_argument("--out", default="client/public/data")
     ex.add_argument("--mode", choices=MODES, default=MODE_LANGUAGE)
@@ -649,6 +664,13 @@ def main(argv=None):
         report(recs, state, cfg, args.tribes)
         if args.out:
             _dump(args.out, cfg, recs)
+    elif args.cmd == "live":
+        from .server import servir
+        servir(cfg, args.tribes, args.seed, args.port, args.eps,
+               args.snap_every)
+    elif args.cmd == "audit":
+        from .audit import audit_many
+        audit_many(cfg, args.tribes, args.generations, args.seeds)
     elif args.cmd == "export":
         from .export import export
         export(cfg, args.mode, args.seed, args.tribes, args.generations,

@@ -318,3 +318,81 @@ def report(findings):
     print(f"  {tally.get(SI,0)}/{total} criterios con evidencia a favor, "
           f"{tally.get(PARCIAL,0)} parciales, {tally.get(NO,0)} no cumplidos.")
     return tally
+
+
+# ---------------------------------------------------------------------
+# Auditoria sobre varias semillas
+#
+# Un informe de una sola corrida dice poco: la variacion entre semillas de
+# este modelo es del mismo orden que muchos de los efectos. Aqui cada
+# criterio se acompaña de su media, su desviacion y —lo mas informativo—
+# EN CUANTAS de las N corridas salio SI. Un criterio que sale SI en 11 de
+# 12 no es lo mismo que uno que sale SI en 6, aunque la media coincida.
+# ---------------------------------------------------------------------
+
+def audit_many(cfg, n_tribes, generations, seeds):
+    from .metrics import lexical_distance
+    from .run import simulate
+
+    print(f"CARTA DE LA LENGUA  —  {seeds} semillas x {generations} "
+          f"generaciones, mundo '{cfg.world}', banda {cfg.max_pop}\n")
+    por_criterio = {}
+    orden = []
+    vivas = 0
+    for seed in range(1, seeds + 1):
+        recs, st = simulate("language", seed, cfg, n_tribes, generations,
+                            metrics_every=max(1, generations // 2))
+        pop, world, rng = st["pop"], st["world"], st["rng"]
+        if pop.extinct():
+            print(f"  semilla {seed:2d}  EXTINTA")
+            continue
+        vivas += 1
+        d = None
+        if n_tribes > 1 and pop.tribes[0].living() and pop.tribes[1].living():
+            d = lexical_distance(pop.tribes[0].living(),
+                                 pop.tribes[1].living(), world, rng)
+        hallazgos = audit(pop, world, rng, recs[-1], st["semantic"],
+                          recs[-1].get("coherence", 0.0), d)
+        for f in hallazgos:
+            if f.name not in por_criterio:
+                por_criterio[f.name] = {"v": [], "ver": Counter()}
+                orden.append(f.name)
+            por_criterio[f.name]["v"].append(f.value)
+            por_criterio[f.name]["ver"][f.verdict] += 1
+        print(f"  semilla {seed:2d}  "
+              + " ".join(f"{f.verdict[0]}" for f in hallazgos), flush=True)
+
+    if not vivas:
+        print("\ntodas las corridas se extinguieron")
+        return
+
+    from .metrics import mean, stdev
+    line = "=" * 78
+    print("\n" + line)
+    print(f"RESULTADO   ({vivas} corridas con supervivientes)")
+    print(line)
+    tally = Counter()
+    for nombre in orden:
+        d = por_criterio[nombre]
+        vs = [x for x in d["v"] if isinstance(x, (int, float))]
+        si = d["ver"].get(SI, 0)
+        pa = d["ver"].get(PARCIAL, 0)
+        no = d["ver"].get(NO, 0) + d["ver"].get(NM, 0)
+        # el veredicto agregado exige mayoria clara, no una corrida afortunada
+        if si >= 0.7 * vivas:
+            v = SI
+        elif si + pa >= 0.6 * vivas:
+            v = PARCIAL
+        else:
+            v = NO
+        tally[v] += 1
+        val = f"{mean(vs):+.3f} ± {stdev(vs):.3f}" if vs else "—"
+        print(f"  [{v:^9}] {nombre:<34} {val:>18}   "
+              f"SI en {si}/{vivas}")
+    print("\n" + "  ".join(f"{k}: {n}" for k, n in tally.most_common()))
+    tot = sum(tally.values())
+    print(f"  {tally.get(SI,0)}/{tot} criterios con evidencia, "
+          f"{tally.get(PARCIAL,0)} parciales, {tally.get(NO,0)} no cumplidos.")
+    print("\nEl veredicto agregado exige SI en al menos el 70% de las")
+    print("  corridas. Un criterio que sale bien en la mitad no es un")
+    print("  criterio cumplido: es uno que depende de la semilla.")
