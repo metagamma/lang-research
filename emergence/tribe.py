@@ -64,6 +64,9 @@ class Tribe:
                 rec = forage_episode(world, speaker, listener, channel,
                                      cfg, rng, gen, acc)
             acc.add(rec)
+            if acc.recorder is not None:
+                acc.recorder.frame(gen, self.index, speaker.id,
+                                   listener.id, rec)
 
     def metabolism_and_death(self):
         cfg = self.cfg
@@ -102,7 +105,8 @@ class Tribe:
 class Accumulator:
     """Contadores de un tramo de simulacion."""
 
-    def __init__(self):
+    def __init__(self, recorder=None):
+        self.recorder = recorder   # solo mira y apunta; no interviene
         self.episodes = 0
         self.signals = 0
         self.understood = 0
@@ -227,8 +231,8 @@ class Population:
                                  channel, cfg, rng, gen, acc)
             acc.add(rec)
 
-    def step(self, world, channel, rng, gen):
-        acc = Accumulator()
+    def step(self, world, channel, rng, gen, recorder=None):
+        acc = Accumulator(recorder)
         births = 0
         for t in self.tribes:
             births += t.step(world, channel, rng, acc, gen)

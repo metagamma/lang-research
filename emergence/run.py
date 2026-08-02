@@ -37,7 +37,7 @@ PROBE_SEED = 20260801        # bateria de medida fija: la misma para todo
 
 
 def simulate(mode, seed, cfg, n_tribes, generations, metrics_every=5,
-             verbose=False):
+             verbose=False, recorder=None, on_generation=None):
     """Una corrida. Devuelve (registros_por_generacion, estado_final)."""
     # streams independientes: el mundo y los estimulos no dependen del modo
     rng_world = FastRandom(seed * 7919 + 11)
@@ -56,7 +56,7 @@ def simulate(mode, seed, cfg, n_tribes, generations, metrics_every=5,
     records = []
     slog = [SemanticLog() for _ in range(n_tribes)]
     for gen in range(1, generations + 1):
-        acc, births = pop.step(world, channel, rng_agents, gen)
+        acc, births = pop.step(world, channel, rng_agents, gen, recorder)
         summ = pop.summary()
         rec = {"gen": gen, "mode": mode, "seed": seed, "births": births}
         rec.update(summ)
@@ -82,6 +82,8 @@ def simulate(mode, seed, cfg, n_tribes, generations, metrics_every=5,
             for ti, t in enumerate(pop.tribes):
                 slog[ti].record(gen, t.living(), world, rng_metric)
         records.append(rec)
+        if on_generation is not None:
+            on_generation(gen, pop, world, rng_metric, rec)
 
         if verbose:
             print(f"  gen {gen:3d} pop={summ['pop']:3d} "
@@ -601,6 +603,17 @@ def main(argv=None):
                    help="señales enteras que caben en memoria (0 = infinita)")
     _add_config_args(b, cfg)
 
+    ex = sub.add_parser("export", help="volcar una corrida para el visor web")
+    ex.add_argument("--out", default="client/public/data")
+    ex.add_argument("--mode", choices=MODES, default=MODE_LANGUAGE)
+    ex.add_argument("--tribes", type=int, default=2)
+    ex.add_argument("--generations", type=int, default=60)
+    ex.add_argument("--seed", type=int, default=3)
+    ex.add_argument("--every", type=int, default=1,
+                    help="guardar 1 de cada N episodios")
+    ex.add_argument("--snap-every", type=int, default=5)
+    _add_config_args(ex, cfg)
+
     so = sub.add_parser("social",
                         help="¿rompe la amplificacion de mayorias el techo?")
     so.add_argument("--tribes", type=int, default=2)
@@ -636,6 +649,10 @@ def main(argv=None):
         report(recs, state, cfg, args.tribes)
         if args.out:
             _dump(args.out, cfg, recs)
+    elif args.cmd == "export":
+        from .export import export
+        export(cfg, args.mode, args.seed, args.tribes, args.generations,
+               args.out, args.every, args.snap_every)
     elif args.cmd == "social":
         from .social import run as social_run
         social_run(cfg, args.tribes, args.generations, args.seeds,

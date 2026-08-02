@@ -7,3 +7,7 @@ dist/
 # documentacion de trabajo: no se publica
 *.md
 !emergence/README.md
+
+# datos generados por --export: se regeneran, no se versionan
+client/public/data/*.json
+client/public/data/*.jsonl
