@@ -223,11 +223,29 @@ class Config:
     #     literatura: atajos demasiado largos vuelven a frenar la
     #     convergencia, asi que no conviene subirlo mucho.
     #
-    #     SIN VERIFICAR. Con 2 semillas: coherencia 0.430 -> 0.420,
-    #     topsim 0.278 -> 0.309, exito 0.604 -> 0.609. Todo dentro del
-    #     ruido a esa muestra. El fundamento teorico es solido y el
-    #     mecanismo no hace daño, pero AFIRMAR que mejora exigiria una
-    #     auditoria de 12 semillas que no se ha corrido.
+    #     VERIFICADO, Y LA HIPOTESIS NO SE SOSTIENE. Tres auditorias de
+    #     12 semillas x 55 generaciones, mismo codigo, misma config:
+    #
+    #       reticula pura       p=0     coherencia 0.475   13/20
+    #       atajos ALEATORIOS   p=0.10  coherencia 0.473   13/20
+    #       atajos MEDIA DIST.  p=0.10  coherencia 0.469   14/20
+    #
+    #     La coherencia NO SE MUEVE. Ni con atajos aleatorios ni con la
+    #     banda intermedia que predice la literatura. El 14/20 del tercer
+    #     brazo lo da composicionalidad cruzando de 8/12 a 9/12 con el
+    #     umbral en 8.4 — una semilla de margen, con topsim 0.324 -> 0.330.
+    #     Ruido. Y arbitrariedad bajo de 11/12 a 9/12 en el mismo brazo.
+    #
+    #     Un sondeo previo de 4 semillas dio +0.052 de coherencia y me lo
+    #     crei un rato. No replico. Queda como recordatorio de que a 4
+    #     semillas la varianza entre semillas es del orden del efecto.
+    #
+    #     CONCLUSION: la topologia de la red NO es el cuello de la
+    #     convergencia lexica en este modelo. Es un resultado negativo con
+    #     potencia, no una duda. Se deja en 0.10 porque no hace daño y el
+    #     fundamento teorico es real, pero NO se le atribuye ninguna
+    #     mejora. Concuerda con Bouchacourt y Baroni: los idiolectos
+    #     multiples no se disuelven con simetria ni con mas mezcla.
     #   ^ el oyente sale de los `near_k` mas cercanos, no de toda la tribu.
     #     Con grafo completo todos acababan viendolo todo y la transmision
     #     cultural no tenia nicho. Con vecindad, el saber se reparte por

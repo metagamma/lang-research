@@ -1,0 +1,45 @@
+CARTA DE LA LENGUA  —  12 semillas x 55 generaciones, mundo 'uqbar', banda 8
+
+  semilla  1  S S S S S S S S S S S S S S S S P N S N
+  semilla  2  S S S S P S S P S S S S N S S S P N P N
+  semilla  3  S S S S P S S S S S S S N S S S P N P N
+  semilla  4  S S S P P S S S S S S S S S S S P N P N
+  semilla  5  S S S S P S S S S S S S S S S S P N P N
+  semilla  6  S S S S P S S S S S S S S S S S P N P N
+  semilla  7  S S S S P S S S S S S S S S S S P N P N
+  semilla  8  S S S S S S S S S S S S P S S S P N P N
+  semilla  9  S S S S P S S P S S S S N S S S P N P N
+  semilla 10  S S S S S S S P S S S S S S S S P N P N
+  semilla 11  S S S S P S S S S S S S P S S S P N P N
+  semilla 12  S S S S P S S P S S S S S S S S P N P N
+
+==============================================================================
+RESULTADO   (12 corridas con supervivientes)
+==============================================================================
+  [   SI    ] inventario de unidades                +30.000 ± 0.000   SI en 12/12
+  [   SI    ] doble articulacion                  +106.202 ± 18.255   SI en 12/12
+  [   SI    ] lexico                                +16.589 ± 2.286   SI en 12/12
+  [   SI    ] arbitrariedad                          +0.153 ± 0.081   SI en 11/12
+  [ PARCIAL ] convencionalidad                       +0.473 ± 0.071   SI en 3/12
+  [   SI    ] morfologia                             +0.927 ± 0.064   SI en 12/12
+  [   SI    ] sintaxis (orden convergente)           +1.000 ± 0.000   SI en 12/12
+  [ PARCIAL ] composicionalidad                      +0.324 ± 0.061   SI en 8/12
+  [   SI    ] productividad                      +2826.000 ± 127.048   SI en 12/12
+  [   SI    ] creatividad                            +0.211 ± 0.018   SI en 12/12
+  [   SI    ] desplazamiento                         +0.331 ± 0.027   SI en 12/12
+  [   SI    ] saber transmitido                      +0.226 ± 0.046   SI en 12/12
+  [ PARCIAL ] polisemia                              +1.080 ± 0.102   SI en 7/12
+  [   SI    ] variacion (dialectos)                  +1.000 ± 0.000   SI en 12/12
+  [   SI    ] cambio semantico                      +10.083 ± 3.147   SI en 12/12
+  [   SI    ] transmision cultural                   +1.000 ± 0.000   SI en 12/12
+  [ PARCIAL ] recursividad                           +0.056 ± 0.010   SI en 0/12
+  [   NO    ] pragmatica                             +0.000 ± 0.000   SI en 0/12
+  [ PARCIAL ] metalingüistica                        +0.077 ± 0.084   SI en 1/12
+  [   NO    ] orden de circunstanciales              +0.000 ± 0.000   SI en 0/12
+
+SI: 13  PARCIAL: 5  NO: 2
+  13/20 criterios con evidencia, 5 parciales, 2 no cumplidos.
+
+El veredicto agregado exige SI en al menos el 70% de las
+  corridas. Un criterio que sale bien en la mitad no es un
+  criterio cumplido: es uno que depende de la semilla.

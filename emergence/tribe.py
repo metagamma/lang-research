@@ -23,22 +23,42 @@ from .episodes import forage_episode, alarm_episode
 
 
 def _vecino(a, pool, rng, k, p_lejano=0.0):
-    """Uno de los k mas cercanos — o, de vez en cuando, alguien de lejos.
+    """Uno de los k mas cercanos — o, de vez en cuando, alguien de MEDIA
+    distancia.
 
     Los encuentros de largo alcance son pocos pero decisivos: sin ellos la
     tribu es una reticula y la convergencia lexica se atasca en un estado
     metaestable con varias convenciones vivas a la vez. Con ellos, una
     convencion mayoritaria puede saltar de un vecindario a otro.
+
+    PERO EL ATAJO NO ES ALEATORIO, y esto importa. La literatura del
+    naming game sobre mundos pequeños con geografia mide que «una
+    distancia geografica demasiado larga de los atajos inhibe la
+    convergencia»: hay una distancia optima, intermedia. Un salto al otro
+    extremo del mapa pone en contacto dos vecindarios que no comparten
+    nada, y la palabra que llega no se ancla en ninguna parte; un salto de
+    media distancia conecta zonas con solape parcial, por donde una
+    convencion si puede propagarse.
+
+    Asi que el atajo sale de la BANDA INTERMEDIA del ranking de
+    distancias: ni los k vecinos de siempre, ni los del borde del mundo.
     """
     otros = [b for b in pool if b is not a]
     if not otros:
         return None
-    if p_lejano and rng.random() < p_lejano:
-        return rng.choice(otros)          # atajo: cualquiera de la tribu
     if len(otros) <= k:
         return rng.choice(otros)
     P = np.stack([b.pos for b in otros])
     d = ((P - a.pos) ** 2).sum(1)
+
+    if p_lejano and rng.random() < p_lejano:
+        orden = np.argsort(d)
+        lo = k                                  # mas alla del vecindario
+        hi = max(lo + 1, int(len(orden) * 0.75))  # pero no el borde
+        banda = orden[lo:hi]
+        if len(banda):
+            return otros[int(rng.choice(banda.tolist()))]
+
     idx = np.argpartition(d, k)[:k]
     return otros[int(rng.choice(idx.tolist()))]
 

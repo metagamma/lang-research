@@ -699,36 +699,69 @@ El informe pasa la lista de criterios que un lingüista pediría para llamar
 corridas**: un criterio que sale bien en la mitad no está cumplido, es uno
 que depende de la semilla.
 
-**13 de 20 con evidencia, 5 parciales, 2 no cumplidos** (12 semillas,
-Uqbar de 17 tipos, banda 8).
+**14 de 20 con evidencia, 4 parciales, 2 no cumplidos** (12 semillas,
+Uqbar de 17 tipos, banda 8) — con una advertencia grande, más abajo.
 
 | criterio | valor | consistencia |
 |---|---|---|
 | inventario de unidades | 30 | 12/12 |
-| doble articulación | 101.1 ± 12.2 | 12/12 |
-| léxico | 16.0 ± 2.1 | 12/12 |
-| morfología | 0.906 | 12/12 |
+| doble articulación | 104.1 ± 19.5 | 12/12 |
+| léxico | 16.5 ± 2.4 | 12/12 |
+| morfología | 0.911 | 12/12 |
 | **sintaxis (SVO convergente)** | **1.000 ± 0.000** | **12/12** |
-| productividad | 2796 significados | 12/12 |
-| desplazamiento | 0.324 | 12/12 |
-| saber transmitido | 0.236 | 12/12 |
+| productividad | 2808 significados | 12/12 |
+| creatividad | 0.212 | 12/12 |
+| desplazamiento | 0.330 | 12/12 |
+| saber transmitido | 0.240 | 12/12 |
 | variación (dialectos) | 1.000 | 12/12 |
-| cambio semántico | 9.2 palabras | 12/12 |
+| cambio semántico | 7.8 palabras | 12/12 |
 | transmisión cultural | — | 12/12 |
-| creatividad | 0.210 | 11/12 |
-| arbitrariedad | +0.109 | 9/12 |
-| *composicionalidad* | 0.326 | 8/12 |
-| *polisemia* | 1.053 | 6/12 |
-| *convencionalidad* | 0.475 | 1/12 |
-| *recursividad* | 0.058 | 0/12 |
-| *metalingüística* | 0.054 | 0/12 |
+| arbitrariedad | +0.128 | 9/12 |
+| composicionalidad | 0.330 | 9/12 |
+| *polisemia* | 1.048 | 6/12 |
+| *convencionalidad* | 0.469 | 4/12 |
+| *recursividad* | 0.051 | 0/12 |
+| *metalingüística* | 0.060 | 0/12 |
 | **pragmática** | **0.000** | **0/12** |
 | **orden de circunstanciales** | **0.000** | **0/12** |
 
-### Los siete que faltan, y por qué
+### El 14 no está ganado
 
-**Seis cuelgan del mismo cuello.** Recursividad, metalingüística,
-convencionalidad, composicionalidad, polisemia y arbitrariedad dependen de
+Composicionalidad cruzó de 8/12 a 9/12 con el umbral en 8.4. **Una semilla
+de margen**, con el topsim moviéndose de 0.324 a 0.330. Es ruido, y en el
+mismo brazo la arbitrariedad bajó de 11/12 a 9/12. Quien cite este 14 sin
+esta advertencia está citando mal: el resultado defendible sigue siendo
+**13-14/20**, y la diferencia entre ambos es una corrida.
+
+### El mundo pequeño: un resultado negativo con potencia
+
+La literatura del *naming game* sobre grafos geométricos dice que las
+retículas regulares se atascan en fases metaestables y que unos pocos
+enlaces de largo alcance las desatascan — con el matiz de que los atajos
+deben ser de distancia intermedia, no aleatorios. Nuestro emparejamiento
+por vecindad (Fase 9) es una retícula, así que la predicción era directa.
+
+Se probó, en las dos formas, con 12 semillas cada una:
+
+| red | coherencia | marcador |
+|---|---|---|
+| retícula pura (`p_lejano=0`) | 0.475 | 13/20 |
+| atajos aleatorios (`p=0.10`) | 0.473 | 13/20 |
+| atajos de media distancia (`p=0.10`) | 0.469 | 14/20 |
+
+**La coherencia no se mueve.** El cuello de la convergencia léxica de este
+modelo no es la topología de la red. Es un resultado negativo con potencia
+estadística, no una duda pendiente.
+
+Un sondeo previo de 4 semillas dio +0.052 de coherencia para los atajos de
+media distancia, y lo di por bueno durante media hora. No replicó a 12. Es
+el mismo error que este README ya documenta en otro sitio: a 4 semillas la
+varianza entre semillas es del orden del efecto que se busca.
+
+### Los seis que faltan, y por qué
+
+**Cinco cuelgan del mismo cuello.** Recursividad, metalingüística,
+convencionalidad, polisemia y arbitrariedad dependen de
 la convergencia léxica, que se estanca en ~0.47. Los mecanismos están
 construidos y son correctos — pero **un morfo nuevo solo converge si entra
 en el circuito de co-observación que alinea los nombres**, y el
@@ -753,6 +786,42 @@ En su momento afirmé que apagar la pragmática «devuelve el marcador a
 código que ya no existía: era una extrapolación presentada como medición.
 Las dos auditorías comparables, sobre el mismo código, dan 12/20 con
 pragmática y 13/20 sin ella.
+
+### Dónde queda esto frente al estado del arte
+
+Revisión bibliográfica hecha en agosto de 2026, después de medir. No
+cambia una línea de código; cambia cómo hay que leer el 14/20.
+
+**Los criterios que nos faltan son los que el campo apenas ha
+investigado.** El survey de taxonomía de lenguaje emergente lo dice
+literalmente: *«recursion, metalinguistic functions, and cultural
+transmission receive minimal empirical investigation»*, y *«pragmatics
+remains underdeveloped compared to semantic and syntactic analysis»*. Dos
+de nuestros huecos y uno que aquí sí sale en 12/12.
+
+**La convencionalidad estancada es un resultado publicado.** Bouchacourt y
+Baroni encuentran que los agentes desarrollan *múltiples idiolectos* y
+concluyen que la simetría completa no basta para que emerja una lengua
+común. Es nuestro `convencionalidad 4/12` con otro nombre, y encaja con el
+resultado negativo del mundo pequeño: más mezcla no disuelve los
+idiolectos.
+
+**El trabajo reciente más ambicioso no tiene gramática.** El marco de
+*social learning agents* (Nature Communications, 2024) obtiene
+composicionalidad medida con topsim y una forma de pragmática, pero
+declara: *«our model lacks predefined syntax or grammar»* y *«we did not
+utilize sequential composition»*. Aquí el orden SVO converge en 12/12.
+
+**Y el survey reclama tres cosas que este modelo ya tiene**: restricciones
+de memoria (nuestro cuello de botella), alternancia de roles (todo agente
+habla y escucha) y dinámica de poblaciones — el campo trabaja
+mayoritariamente con dos agentes de rol fijo.
+
+Una advertencia que va en nuestra contra: el survey señala *«ill-adapted
+metrics»* y umbrales arbitrarios como problema extendido. Nuestro umbral
+del 70% de corridas es una decisión de este repo, no un estándar. El 14/20
+**no es comparable** con las cifras de otros trabajos, porque cada uno
+mide con su propia regla.
 
 ---
 
