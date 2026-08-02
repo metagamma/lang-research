@@ -1,0 +1,31 @@
+CUELLO DE BOTELLA  —  8 semillas x 4 capacidades de memoria x 120 generaciones
+
+  memoria=   8  topsim=+0.497  reglas=0.84  compuestas=0.64  cobertura=0.66  nuevas=0.66  pob= 34.4
+  memoria=  16  topsim=+0.449  reglas=0.82  compuestas=0.39  cobertura=0.68  nuevas=0.41  pob= 38.9
+  memoria=  32  topsim=+0.137  reglas=0.80  compuestas=0.20  cobertura=0.63  nuevas=0.22  pob= 35.5
+  memoria= inf  topsim=+0.126  reglas=0.82  compuestas=0.20  cobertura=0.64  nuevas=0.23  pob= 33.1
+
+========================================================================
+CONTRA memoria=inf (el cuello mas flojo)
+========================================================================
+
+  similitud topografica
+    memoria=   8 - inf =  +0.370  IC95[+0.290, +0.448]  delta=+1.00  ¿distinto? SI
+    memoria=  16 - inf =  +0.322  IC95[+0.267, +0.379]  delta=+1.00  ¿distinto? SI
+    memoria=  32 - inf =  +0.011  IC95[-0.034, +0.058]  delta=+0.16  ¿distinto? no
+
+  señales compuestas
+    memoria=   8 - inf =  +0.440  IC95[+0.430, +0.450]  delta=+1.00  ¿distinto? SI
+    memoria=  16 - inf =  +0.188  IC95[+0.178, +0.197]  delta=+1.00  ¿distinto? SI
+    memoria=  32 - inf =  -0.001  IC95[-0.018, +0.021]  delta=-0.22  ¿distinto? no
+
+  cobertura de significados
+    memoria=   8 - inf =  +0.023  IC95[-0.016, +0.059]  delta=+0.36  ¿distinto? no
+    memoria=  16 - inf =  +0.046  IC95[+0.000, +0.086]  delta=+0.55  ¿distinto? no
+    memoria=  32 - inf =  -0.014  IC95[-0.066, +0.031]  delta=-0.03  ¿distinto? no
+
+  Y lo que de verdad importa: ¿sirve de algo componer?
+    memoria=   8  aciertos en combinacion NUEVA 0.594   en combinacion ya dicha 0.713
+    memoria=  16  aciertos en combinacion NUEVA 0.538   en combinacion ya dicha 0.675
+    memoria=  32  aciertos en combinacion NUEVA 0.470   en combinacion ya dicha 0.613
+    memoria=   0  aciertos en combinacion NUEVA 0.476   en combinacion ya dicha 0.607

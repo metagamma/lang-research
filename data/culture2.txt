@@ -1,0 +1,65 @@
+CULTURA ACUMULADA  —  10 semillas x 2 brazos x 70 generaciones
+
+
+  PRUEBA A — ¿sirve lo que a uno le cuentan?   [language]
+  tipo              pago            vivido        de oidas       ignorante
+  veneno_raro        -22         6 ev=1.00        0    —        10 ev=0.00
+  hongo_palido       -12        11 ev=1.00        0    —         5 ev=0.00
+  fruto_amargo       -10        13 ev=1.00        0    —         3 ev=0.00
+  ev = fraccion que espera perder si se acerca (evitacion correcta
+       para lo toxico; los tres grupos ven el MISMO mundo)
+  lang semilla  1  purgados=  6  sobreviven= 10  evitan_despues=0.00  de_oidas=0
+
+  PRUEBA B — purga de los que lo vivieron   [language]  objetivo: veneno_raro
+    poblacion antes            16
+    purgados (lo habian vivido)    6
+    supervivientes                10
+    lo evitaban ANTES          0.38
+    lo evitan DESPUES          0.00   <- ninguno lo ha sufrido jamas
+    de ellos, saben de oidas   0   / ignorantes 10
+  lang semilla  2  purgados=  7  sobreviven=  9  evitan_despues=0.00  de_oidas=0
+  lang semilla  3  purgados=  6  sobreviven= 10  evitan_despues=0.00  de_oidas=0
+  lang semilla  4  purgados=  4  sobreviven= 12  evitan_despues=0.00  de_oidas=0
+  lang semilla  5  purgados=  3  sobreviven= 13  evitan_despues=0.00  de_oidas=0
+  lang semilla  6  purgados=  7  sobreviven=  9  evitan_despues=0.00  de_oidas=0
+  lang semilla  7  purgados=  3  sobreviven= 13  evitan_despues=0.00  de_oidas=0
+  lang semilla  8  purgados=  5  sobreviven= 11  evitan_despues=0.00  de_oidas=0
+  lang semilla  9  purgados=  6  sobreviven= 10  evitan_despues=0.00  de_oidas=0
+  lang semilla 10  purgados=  6  sobreviven= 10  evitan_despues=0.00  de_oidas=0
+
+  PRUEBA A — ¿sirve lo que a uno le cuentan?   [mute]
+  tipo              pago            vivido        de oidas       ignorante
+  veneno_raro        -22         3 ev=1.00        0    —        13 ev=0.00
+  hongo_palido       -12        13 ev=0.85        0    —         3 ev=0.00
+  fruto_amargo       -10        14 ev=0.93        0    —         2 ev=0.00
+  ev = fraccion que espera perder si se acerca (evitacion correcta
+       para lo toxico; los tres grupos ven el MISMO mundo)
+  mute semilla  1  purgados=  3  sobreviven= 13  evitan_despues=0.00  de_oidas=0
+
+  PRUEBA B — purga de los que lo vivieron   [mute]  objetivo: veneno_raro
+    poblacion antes            16
+    purgados (lo habian vivido)    3
+    supervivientes                13
+    lo evitaban ANTES          0.19
+    lo evitan DESPUES          0.00   <- ninguno lo ha sufrido jamas
+    de ellos, saben de oidas   0   / ignorantes 13
+  mute semilla  2  purgados=  4  sobreviven= 12  evitan_despues=0.00  de_oidas=0
+  mute semilla  3  purgados=  7  sobreviven=  9  evitan_despues=0.00  de_oidas=0
+  mute semilla  4  purgados=  4  sobreviven= 12  evitan_despues=0.00  de_oidas=0
+  mute semilla  5  purgados=  2  sobreviven= 14  evitan_despues=0.00  de_oidas=0
+  mute semilla  6  purgados=  5  sobreviven= 11  evitan_despues=0.00  de_oidas=0
+  mute semilla  7  purgados=  4  sobreviven= 12  evitan_despues=0.00  de_oidas=0
+  mute semilla  8  purgados=  4  sobreviven= 12  evitan_despues=0.00  de_oidas=0
+  mute semilla  9  purgados=  5  sobreviven= 11  evitan_despues=0.00  de_oidas=0
+  mute semilla 10  purgados=  9  sobreviven=  7  evitan_despues=0.00  de_oidas=0
+
+========================================================================
+RESULTADO
+========================================================================
+  language  evitacion antes 0.331   DESPUES de la purga 0.000   (n=10)
+  mute      evitacion antes 0.294   DESPUES de la purga 0.000   (n=10)
+
+  language - mute (tras la purga) = +0.000  IC95[+0.000, +0.000]  delta=+0.00  ¿distinto de 0? no
+
+  Si esa diferencia es positiva y significativa, un saber
+  sobrevivio a todos los que lo adquirieron. Si no lo es, no.

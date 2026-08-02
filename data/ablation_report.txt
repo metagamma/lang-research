@@ -1,0 +1,56 @@
+ABLACION  —  12 semillas x 3 brazos x 80 generaciones
+
+  semilla  1  lang pob= 16.0 exito=0.61 | mute pob= 16.0 exito=0.49 | nois pob= 16.0 exito=0.51
+  semilla  2  lang pob= 16.0 exito=0.60 | mute pob= 16.0 exito=0.49 | nois pob= 16.0 exito=0.52
+  semilla  3  lang pob= 16.0 exito=0.58 | mute pob= 16.0 exito=0.49 | nois pob= 16.0 exito=0.51
+  semilla  4  lang pob= 16.0 exito=0.58 | mute pob= 16.0 exito=0.49 | nois pob= 16.0 exito=0.51
+  semilla  5  lang pob= 16.0 exito=0.61 | mute pob= 16.0 exito=0.50 | nois pob= 16.0 exito=0.51
+  semilla  6  lang pob= 16.0 exito=0.62 | mute pob= 16.0 exito=0.49 | nois pob= 16.0 exito=0.52
+  semilla  7  lang pob= 16.0 exito=0.61 | mute pob= 16.0 exito=0.50 | nois pob= 16.0 exito=0.51
+  semilla  8  lang pob= 16.0 exito=0.63 | mute pob= 16.0 exito=0.49 | nois pob= 16.0 exito=0.51
+  semilla  9  lang pob= 16.0 exito=0.60 | mute pob= 16.0 exito=0.50 | nois pob= 16.0 exito=0.51
+  semilla 10  lang pob= 16.0 exito=0.59 | mute pob= 16.0 exito=0.49 | nois pob= 16.0 exito=0.52
+  semilla 11  lang pob= 16.0 exito=0.60 | mute pob= 15.9 exito=0.49 | nois pob= 16.0 exito=0.51
+  semilla 12  lang pob= 16.0 exito=0.60 | mute pob= 16.0 exito=0.49 | nois pob= 16.0 exito=0.51
+
+  datos -> data/ablation.jsonl
+
+========================================================================
+RESULTADO
+========================================================================
+
+  poblacion sostenida  (mejor = mas)
+    language    16.000  ± 0.000
+    mute        15.994  ± 0.022
+    noise       16.000  ± 0.000
+    language - mute   =  +0.006  IC95[+0.000, +0.019]  delta=+0.08  ¿distinto de 0? no
+    language - noise  =  +0.000  IC95[+0.000, +0.000]  delta=+0.00  ¿distinto de 0? no
+
+  energia media  (mejor = mas)
+    language   102.595  ± 1.973
+    mute       101.060  ± 1.857
+    noise      100.339  ± 1.667
+    language - mute   =  +1.535  IC95[-0.006, +2.971]  delta=+0.47  ¿distinto de 0? no
+    language - noise  =  +2.257  IC95[+0.915, +3.681]  delta=+0.60  ¿distinto de 0? SI
+
+  decisiones acertadas  (mejor = mas)
+    language     0.603  ± 0.016
+    mute         0.491  ± 0.004
+    noise        0.513  ± 0.005
+    language - mute   =  +0.112  IC95[+0.104, +0.122]  delta=+1.00  ¿distinto de 0? SI
+    language - noise  =  +0.090  IC95[+0.082, +0.099]  delta=+1.00  ¿distinto de 0? SI
+
+  muertes por depredador  (mejor = menos)
+    language     0.126  ± 0.015
+    mute         0.128  ± 0.023
+    noise        0.112  ± 0.018
+    language - mute   =  -0.002  IC95[-0.017, +0.012]  delta=-0.03  ¿distinto de 0? no
+    language - noise  =  +0.014  IC95[+0.002, +0.026]  delta=+0.42  ¿distinto de 0? SI
+
+  El brazo 'noise' emite señales igual de frecuentes pero sin
+  informacion. Separa SEÑALAR de INFORMAR: si language solo
+  ganara a mute, podria ser un efecto del ruido y no del sentido.
+
+  Nota: en 'mute' nadie paga speak_cost, asi que el brazo de
+  control tiene una pequeña ventaja energetica. La comparacion
+  es conservadora a proposito.

@@ -1,0 +1,381 @@
+{
+  "name": "Uqbar",
+  "version": 2,
+  "note": "El mundo. Contiene FISICA, no significados: vectores sensoriales, afordancias y costes. Los campos 'name' existen SOLO para las metricas -- ningun agente los ve jamas. Meter aqui palabras, conceptos o enseñanzas seria regalarle al modelo justo lo que debe emerger.",
+  "design": "Cada familia sensorial contiene una trampa: un par casi indistinguible con afordancias opuestas. Es el motor de la formacion de conceptos.",
+  "expected_payoff": 2.25,
+  "toxic_calibration": 0.5734,
+  "senses": [
+    [
+      "vista",
+      "luminosidad"
+    ],
+    [
+      "vista",
+      "rojez"
+    ],
+    [
+      "vista",
+      "verdor"
+    ],
+    [
+      "olfato",
+      "dulzor"
+    ],
+    [
+      "olfato",
+      "acritud"
+    ],
+    [
+      "gusto",
+      "amargor"
+    ],
+    [
+      "gusto",
+      "salinidad"
+    ],
+    [
+      "tacto",
+      "dureza"
+    ],
+    [
+      "tacto",
+      "temperatura"
+    ]
+  ],
+  "places": [
+    {
+      "name": "junto",
+      "cost": 0.4
+    },
+    {
+      "name": "vega",
+      "cost": 1.3
+    },
+    {
+      "name": "valle",
+      "cost": 2.2
+    },
+    {
+      "name": "loma",
+      "cost": 3.2
+    },
+    {
+      "name": "bosque",
+      "cost": 4.3
+    },
+    {
+      "name": "lejos",
+      "cost": 5.4
+    }
+  ],
+  "kinds": [
+    {
+      "name": "fruto_dulce",
+      "prototype": [
+        0.7,
+        0.8,
+        0.2,
+        0.85,
+        0.15,
+        0.1,
+        0.2,
+        0.2,
+        0.5
+      ],
+      "spread": 0.055,
+      "affordance": "alimento",
+      "payoff": 8.0,
+      "abundance": 1.0
+    },
+    {
+      "name": "fruto_amargo",
+      "prototype": [
+        0.7,
+        0.78,
+        0.2,
+        0.55,
+        0.45,
+        0.45,
+        0.2,
+        0.2,
+        0.5
+      ],
+      "spread": 0.055,
+      "affordance": "toxico",
+      "payoff": -10.0,
+      "abundance": 0.344
+    },
+    {
+      "name": "raiz",
+      "prototype": [
+        0.25,
+        0.35,
+        0.3,
+        0.45,
+        0.3,
+        0.35,
+        0.45,
+        0.75,
+        0.35
+      ],
+      "spread": 0.055,
+      "affordance": "alimento",
+      "payoff": 6.0,
+      "abundance": 0.7
+    },
+    {
+      "name": "raiz_fibrosa",
+      "prototype": [
+        0.25,
+        0.35,
+        0.3,
+        0.45,
+        0.62,
+        0.63,
+        0.45,
+        0.53,
+        0.35
+      ],
+      "spread": 0.055,
+      "affordance": "toxico",
+      "payoff": -8.0,
+      "abundance": 0.2408
+    },
+    {
+      "name": "charca",
+      "prototype": [
+        0.6,
+        0.1,
+        0.25,
+        0.1,
+        0.1,
+        0.05,
+        0.35,
+        0.05,
+        0.25
+      ],
+      "spread": 0.055,
+      "affordance": "agua",
+      "payoff": 4.0,
+      "abundance": 0.9
+    },
+    {
+      "name": "charca_salobre",
+      "prototype": [
+        0.6,
+        0.1,
+        0.25,
+        0.1,
+        0.1,
+        0.27,
+        0.73,
+        0.05,
+        0.25
+      ],
+      "spread": 0.055,
+      "affordance": "toxico",
+      "payoff": -5.0,
+      "abundance": 0.2294
+    },
+    {
+      "name": "bestia",
+      "prototype": [
+        0.4,
+        0.45,
+        0.15,
+        0.3,
+        0.55,
+        0.3,
+        0.6,
+        0.55,
+        0.8
+      ],
+      "spread": 0.055,
+      "affordance": "alimento",
+      "payoff": 9.0,
+      "abundance": 0.55
+    },
+    {
+      "name": "acechante",
+      "prototype": [
+        0.4,
+        0.7,
+        0.15,
+        0.3,
+        0.8,
+        0.3,
+        0.6,
+        0.68,
+        0.95
+      ],
+      "spread": 0.055,
+      "affordance": "depredador",
+      "payoff": 0.0,
+      "abundance": 0.6
+    },
+    {
+      "name": "piedra",
+      "prototype": [
+        0.35,
+        0.2,
+        0.15,
+        0.05,
+        0.1,
+        0.05,
+        0.25,
+        0.95,
+        0.3
+      ],
+      "spread": 0.055,
+      "affordance": "inerte",
+      "payoff": 0.0,
+      "abundance": 0.8
+    },
+    {
+      "name": "piedra_ardiente",
+      "prototype": [
+        0.35,
+        0.2,
+        0.15,
+        0.05,
+        0.3,
+        0.05,
+        0.25,
+        0.95,
+        0.75
+      ],
+      "spread": 0.055,
+      "affordance": "toxico",
+      "payoff": -6.0,
+      "abundance": 0.172
+    },
+    {
+      "name": "flor",
+      "prototype": [
+        0.85,
+        0.3,
+        0.65,
+        0.7,
+        0.2,
+        0.15,
+        0.1,
+        0.1,
+        0.45
+      ],
+      "spread": 0.055,
+      "affordance": "inerte",
+      "payoff": 0.0,
+      "abundance": 0.65
+    },
+    {
+      "name": "flor_nectar",
+      "prototype": [
+        0.7,
+        0.3,
+        0.65,
+        0.92,
+        0.2,
+        0.15,
+        0.1,
+        0.1,
+        0.45
+      ],
+      "spread": 0.055,
+      "affordance": "alimento",
+      "payoff": 3.0,
+      "abundance": 0.45
+    },
+    {
+      "name": "hongo",
+      "prototype": [
+        0.45,
+        0.15,
+        0.1,
+        0.35,
+        0.45,
+        0.3,
+        0.3,
+        0.3,
+        0.4
+      ],
+      "spread": 0.055,
+      "affordance": "alimento",
+      "payoff": 7.0,
+      "abundance": 0.55
+    },
+    {
+      "name": "hongo_palido",
+      "prototype": [
+        0.75,
+        0.15,
+        0.1,
+        0.17,
+        0.45,
+        0.55,
+        0.3,
+        0.3,
+        0.4
+      ],
+      "spread": 0.055,
+      "affordance": "toxico",
+      "payoff": -12.0,
+      "abundance": 0.2179
+    },
+    {
+      "name": "veneno_raro",
+      "prototype": [
+        0.15,
+        0.1,
+        0.9,
+        0.15,
+        0.85,
+        0.8,
+        0.85,
+        0.45,
+        0.15
+      ],
+      "spread": 0.05,
+      "affordance": "toxico",
+      "payoff": -22.0,
+      "abundance": 0.01,
+      "fixed_abundance": true
+    },
+    {
+      "name": "larva",
+      "prototype": [
+        0.3,
+        0.55,
+        0.2,
+        0.2,
+        0.65,
+        0.4,
+        0.5,
+        0.35,
+        0.65
+      ],
+      "spread": 0.055,
+      "affordance": "alimento",
+      "payoff": 5.0,
+      "abundance": 0.5
+    },
+    {
+      "name": "enjambre",
+      "prototype": [
+        0.3,
+        0.55,
+        0.2,
+        0.2,
+        0.93,
+        0.4,
+        0.5,
+        0.15,
+        0.83
+      ],
+      "spread": 0.055,
+      "affordance": "toxico",
+      "payoff": -4.0,
+      "abundance": 0.258
+    }
+  ]
+}

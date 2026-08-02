@@ -1,0 +1,83 @@
+AMPLIFICACION DE MAYORIAS  —  10 semillas x 3 niveles x 50 generaciones
+
+  e=0.0  semilla  1  coher=0.486 exito=0.571 topsim=+0.324 encajes=0.02 adj=0.023
+  e=0.0  semilla  2  coher=0.420 exito=0.576 topsim=+0.308 encajes=0.10 adj=0.018
+  e=0.0  semilla  3  coher=0.479 exito=0.615 topsim=+0.384 encajes=0.11 adj=0.061
+  e=0.0  semilla  4  coher=0.478 exito=0.587 topsim=+0.300 encajes=0.03 adj=0.070
+  e=0.0  semilla  5  coher=0.432 exito=0.579 topsim=+0.394 encajes=0.03 adj=0.021
+  e=0.0  semilla  6  coher=0.466 exito=0.579 topsim=+0.333 encajes=0.04 adj=0.023
+  e=0.0  semilla  7  coher=0.484 exito=0.596 topsim=+0.345 encajes=0.06 adj=0.079
+  e=0.0  semilla  8  coher=0.477 exito=0.584 topsim=+0.269 encajes=0.04 adj=0.039
+  e=0.0  semilla  9  coher=0.559 exito=0.607 topsim=+0.391 encajes=0.07 adj=0.048
+  e=0.0  semilla 10  coher=0.458 exito=0.578 topsim=+0.359 encajes=0.03 adj=0.033
+  e=0.4  semilla  1  coher=0.656 exito=0.610 topsim=+0.414 encajes=0.03 adj=0.077
+  e=0.4  semilla  2  coher=0.594 exito=0.621 topsim=+0.366 encajes=0.04 adj=0.093
+  e=0.4  semilla  3  coher=0.628 exito=0.623 topsim=+0.337 encajes=0.05 adj=0.064
+  e=0.4  semilla  4  coher=0.696 exito=0.615 topsim=+0.418 encajes=0.03 adj=0.118
+  e=0.4  semilla  5  coher=0.656 exito=0.618 topsim=+0.378 encajes=0.11 adj=0.113
+  e=0.4  semilla  6  coher=0.612 exito=0.615 topsim=+0.358 encajes=0.06 adj=0.144
+  e=0.4  semilla  7  coher=0.580 exito=0.607 topsim=+0.354 encajes=0.07 adj=0.060
+  e=0.4  semilla  8  coher=0.728 exito=0.635 topsim=+0.494 encajes=0.06 adj=0.055
+  e=0.4  semilla  9  coher=0.577 exito=0.620 topsim=+0.343 encajes=0.04 adj=0.081
+  e=0.4  semilla 10  coher=0.670 exito=0.611 topsim=+0.431 encajes=0.09 adj=0.068
+  e=0.8  semilla  1  coher=0.711 exito=0.594 topsim=+0.361 encajes=0.07 adj=0.089
+  e=0.8  semilla  2  coher=0.698 exito=0.617 topsim=+0.344 encajes=0.16 adj=0.063
+  e=0.8  semilla  3  coher=0.639 exito=0.602 topsim=+0.291 encajes=0.05 adj=0.031
+  e=0.8  semilla  4  coher=0.647 exito=0.608 topsim=+0.382 encajes=0.12 adj=0.097
+  e=0.8  semilla  5  coher=0.610 exito=0.591 topsim=+0.353 encajes=0.08 adj=0.066
+  e=0.8  semilla  6  coher=0.689 exito=0.618 topsim=+0.390 encajes=0.05 adj=0.205
+  e=0.8  semilla  7  coher=0.649 exito=0.618 topsim=+0.481 encajes=0.01 adj=0.073
+  e=0.8  semilla  8  coher=0.654 exito=0.625 topsim=+0.304 encajes=0.07 adj=0.111
+  e=0.8  semilla  9  coher=0.640 exito=0.606 topsim=+0.279 encajes=0.03 adj=0.093
+  e=0.8  semilla 10  coher=0.660 exito=0.610 topsim=+0.363 encajes=0.06 adj=0.099
+
+==========================================================================
+RESULTADO   (contra social_exp=0.0, que es el modelo actual)
+==========================================================================
+
+  coherencia lexica
+    e=0.0      0.474  ± 0.037  (n=10)
+    e=0.4      0.640  ± 0.050  (n=10)
+    e=0.8      0.660  ± 0.031  (n=10)
+    e=0.4 - e=0.0 =  +0.166  IC95[+0.130, +0.202]  delta=+1.00  ¿distinto? SI
+    e=0.8 - e=0.0 =  +0.186  IC95[+0.156, +0.213]  delta=+1.00  ¿distinto? SI
+
+  decisiones acertadas
+    e=0.0      0.587  ± 0.014  (n=10)
+    e=0.4      0.618  ± 0.008  (n=10)
+    e=0.8      0.609  ± 0.011  (n=10)
+    e=0.4 - e=0.0 =  +0.030  IC95[+0.020, +0.040]  delta=+0.92  ¿distinto? SI
+    e=0.8 - e=0.0 =  +0.022  IC95[+0.011, +0.032]  delta=+0.76  ¿distinto? SI
+
+  composicionalidad
+    e=0.0      0.341  ± 0.042  (n=10)
+    e=0.4      0.389  ± 0.049  (n=10)
+    e=0.8      0.355  ± 0.058  (n=10)
+    e=0.4 - e=0.0 =  +0.049  IC95[+0.013, +0.087]  delta=+0.52  ¿distinto? SI
+    e=0.8 - e=0.0 =  +0.014  IC95[-0.026, +0.058]  delta=+0.08  ¿distinto? no
+
+  comprension de encajes
+    e=0.0      0.053  ± 0.029  (n=10)
+    e=0.4      0.058  ± 0.026  (n=10)
+    e=0.8      0.071  ± 0.044  (n=10)
+    e=0.4 - e=0.0 =  +0.005  IC95[-0.019, +0.027]  delta=+0.14  ¿distinto? no
+    e=0.8 - e=0.0 =  +0.018  IC95[-0.013, +0.050]  delta=+0.26  ¿distinto? no
+
+  comprension de descripciones
+    e=0.0      0.040  ± 0.025  (n=10)
+    e=0.4      0.074  ± 0.035  (n=10)
+    e=0.8      0.110  ± 0.053  (n=10)
+    e=0.4 - e=0.0 =  +0.034  IC95[+0.008, +0.059]  delta=+0.60  ¿distinto? SI
+    e=0.8 - e=0.0 =  +0.070  IC95[+0.038, +0.106]  delta=+0.82  ¿distinto? SI
+
+  solapamiento adjetival
+    e=0.0      0.042  ± 0.022  (n=10)
+    e=0.4      0.087  ± 0.029  (n=10)
+    e=0.8      0.093  ± 0.046  (n=10)
+    e=0.4 - e=0.0 =  +0.046  IC95[+0.025, +0.068]  delta=+0.78  ¿distinto? SI
+    e=0.8 - e=0.0 =  +0.051  IC95[+0.024, +0.083]  delta=+0.78  ¿distinto? SI
+
+  Lo que decide si el diagnostico era bueno no es la primera
+  fila sino las cuatro ultimas: si la coherencia sube y los
+  mecanismos que colgaban de ella no se mueven, el techo no era
+  la coherencia.

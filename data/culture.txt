@@ -1,0 +1,43 @@
+CULTURA ACUMULADA  —  10 semillas x 2 brazos x 70 generaciones
+
+
+  PRUEBA A — ¿sirve lo que a uno le cuentan?   [language]
+  tipo              pago            vivido        de oidas       ignorante
+  veneno_raro        -22        13 ev=1.00        0    —         3 ev=0.00
+  hongo_palido       -12        13 ev=1.00        0    —         3 ev=0.00
+  fruto_amargo       -10        14 ev=1.00        0    —         2 ev=0.00
+  ev = fraccion que espera perder si se acerca (evitacion correcta
+       para lo toxico; los tres grupos ven el MISMO mundo)
+
+  PRUEBA B — purga de los que lo vivieron   [language]  objetivo: veneno_raro
+    poblacion antes            16
+    purgados (lo habian vivido)   13
+    supervivientes                 3
+    lo evitaban ANTES          0.81
+    lo evitan DESPUES          0.00   <- ninguno lo ha sufrido jamas
+    de ellos, saben de oidas   0   / ignorantes 3
+
+  PRUEBA A — ¿sirve lo que a uno le cuentan?   [mute]
+  tipo              pago            vivido        de oidas       ignorante
+  veneno_raro        -22        16 ev=1.00        0    —          0    —  
+  hongo_palido       -12        14 ev=1.00        0    —         2 ev=0.00
+  fruto_amargo       -10        16 ev=1.00        0    —          0    —  
+  ev = fraccion que espera perder si se acerca (evitacion correcta
+       para lo toxico; los tres grupos ven el MISMO mundo)
+
+  PRUEBA B — purga de los que lo vivieron   [mute]  objetivo: veneno_raro
+    poblacion antes            16
+    purgados (lo habian vivido)   16
+    supervivientes                 0
+    no sobrevive nadie
+
+========================================================================
+RESULTADO
+========================================================================
+  language  evitacion antes 0.771   DESPUES de la purga 0.000   (n=9)
+  mute      evitacion antes 0.736   DESPUES de la purga 0.000   (n=9)
+
+  language - mute (tras la purga) = +0.000  IC95[+0.000, +0.000]  delta=+0.00  ¿distinto de 0? no
+
+  Si esa diferencia es positiva y significativa, un saber
+  sobrevivio a todos los que lo adquirieron. Si no lo es, no.
