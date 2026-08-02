@@ -1,0 +1,5 @@
+DE QUE ESTA HECHO EL 0.45 - reparto de variantes por significado
+
+gen   variantes/tipo   cuota 1a    cuota 2a    cuota 3a+
+  55       4.75     0.490       0.231       0.280
+ 220       5.53     0.451       0.234       0.315

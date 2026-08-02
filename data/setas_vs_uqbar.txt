@@ -1,0 +1,3 @@
+UQBAR (inventado) contra SETAS (dataset real) — 6 semillas x 55 gen
+
+mundo   coherencia   topsim   exito    lex    por semilla

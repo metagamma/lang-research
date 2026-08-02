@@ -14,3 +14,6 @@ client/public/data/*.jsonl
 
 # log del servidor en vivo: cambia sin parar, no es un resultado
 data/live.log
+
+# dataset: solo lo que usa el generador (24K). El derivado son 2.8M
+data/raw/MushroomDataset/secondary_data.csv

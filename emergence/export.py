@@ -30,9 +30,11 @@ es la diferencia entre 7 MB y 20 MB, y el cliente los lee una vez.
 """
 
 import json
+from collections import Counter
 import os
 
-from .metrics import lexical_coherence, naming_table, topographic_similarity
+from .metrics import (lexical_coherence, lexicon_stats, naming_table,
+                      topographic_similarity)
 
 
 class Recorder:
@@ -106,8 +108,12 @@ def snapshot(gen, pop, world, rng, rec):
             "n": len(vivos),
             "coherencia": round(lexical_coherence(vivos, world, rng, 6), 4),
             "nombres": _variantes(vivos, world, rng),
+            "orden": _ordenes(vivos),
             "agentes": [{"id": a.id, "e": round(a.energy, 1), "edad": a.age,
-                         "cats": len(a.concepts), "lex": a.gram.size()}
+                         "cats": len(a.concepts), "lex": a.gram.size(),
+                         "vig": round(float(a.vigilance), 3),
+                         "x": round(float(a.pos[0]), 3),
+                         "y": round(float(a.pos[1]), 3)}
                         for a in vivos],
         })
     return {
@@ -118,7 +124,87 @@ def snapshot(gen, pop, world, rng, rec):
         "topsim": round(rec.get("topsim", 0.0), 4),
         "senal": round(rec.get("signal_rate", 0.0), 4),   # sin acento: es una clave de datos
         "tribus": tribus,
+        # --- lo que hace legible una lengua, no solo medible -----------
+        "diccionario": _diccionario(pop.living(), world, rng),
+        "dialectos": _dialectos(pop, world, rng),
+        "lexico": {k: round(v, 4)
+                   for k, v in lexicon_stats(pop.living()).items()},
+        "metricas": {k: round(rec.get(k, 0.0), 4) for k in (
+            "alignment", "prediction", "past_rate", "desc_rate",
+            "said_composed", "novel_rate", "novel_success",
+            "testimony_rate", "quote_rate", "meta_rate", "alarm_rate")},
     }
+
+
+def _ordenes(agents):
+    """Reparto de ordenes de palabras. Es la Fase 6 hecha visible: seis
+    ordenes posibles y una que gana."""
+    from .syntax import ORDER_NAME
+    cuenta = Counter()
+    for a in agents:
+        try:
+            cuenta[ORDER_NAME[a.gram.best_order()]] += 1
+        except Exception:
+            pass
+    tot = sum(cuenta.values()) or 1
+    return [[o, round(n / tot, 3)] for o, n in cuenta.most_common()]
+
+
+def _diccionario(agents, world, rng, per_kind=6, tope=40):
+    """La lengua como diccionario: para cada cosa del mundo, como se
+    llama, cuanta gente la llama asi, y cuantas rivales tiene vivas.
+
+    Es la vista que faltaba. Una tabla de coherencia dice 0.45; un
+    diccionario enseña QUE dice 0.45 — cinco palabras para la misma seta,
+    la primera con el 45% de la tribu.
+    """
+    if not agents:
+        return []
+    tabla = naming_table(agents, world, rng, per_kind)
+    filas = []
+    for kind, counts in tabla.items():
+        tot = sum(counts.values())
+        if not tot:
+            continue
+        formas = counts.most_common(5)
+        filas.append({
+            "cosa": kind,
+            "formas": [[f, round(n / tot, 3)] for f, n in formas],
+            "vivas": len(counts),
+            "cuota": round(formas[0][1] / tot, 3),
+        })
+    filas.sort(key=lambda r: -r["cuota"])
+    return filas[:tope]
+
+
+def _dialectos(pop, world, rng):
+    """Cuanto se parecen las lenguas de dos tribus.
+
+    Para cada cosa, ¿la llaman igual? La media es la distancia dialectal.
+    Cero seria la misma lengua; uno, lenguas sin una palabra en comun.
+    """
+    vivas = [t for t in pop.tribes if t.living()]
+    if len(vivas) < 2:
+        return []
+    tablas = [naming_table(t.living(), world, rng, 6) for t in vivas]
+    fuera = []
+    for i in range(len(vivas)):
+        for j in range(i + 1, len(vivas)):
+            comunes, coincide = 0, 0
+            for kind in tablas[i]:
+                if kind not in tablas[j]:
+                    continue
+                a = tablas[i][kind].most_common(1)
+                b = tablas[j][kind].most_common(1)
+                if not a or not b:
+                    continue
+                comunes += 1
+                coincide += 1 if a[0][0] == b[0][0] else 0
+            if comunes:
+                fuera.append({"a": vivas[i].index, "b": vivas[j].index,
+                              "comparte": round(coincide / comunes, 3),
+                              "cosas": comunes})
+    return fuera
 
 
 def export(cfg, mode, seed, n_tribes, generations, outdir,
