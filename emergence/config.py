@@ -251,6 +251,27 @@ class Config:
     #     cultural no tenia nicho. Con vecindad, el saber se reparte por
     #     geografia. Prediccion: bajara la coherencia global (los juegos de
     #     nombres sobre retículas forman dominios) y apareceran dialectos.
+    lex_payoff: float = 0.0          # DIAGNOSTICO: el pago refuerza el lexico
+    #   ^ ROMPE LA REGLA 2 DE `CLAUDE.md`. Debe quedarse en 0.0 en toda
+    #     corrida que se publique como resultado del modelo.
+    #
+    #     La regla dice: la lengua se aprende por co-observacion, el valor
+    #     por experiencia; el lexico NUNCA se refuerza con el pago
+    #     recibido. Gracias a eso el lenguaje no puede colarse en la
+    #     funcion de recompensa, y por eso la ablacion significa algo
+    #     (delta = 1.00 contra silencio y contra ruido).
+    #
+    #     Existe SOLO para falsar una hipotesis: que el atractor de
+    #     coherencia en 0.45 lo produce ese aislamiento. Si al abrir esta
+    #     via la coherencia se despega, la hipotesis queda confirmada y
+    #     sabremos que 0.45 es el PRECIO de la regla, no un defecto. Si no
+    #     se despega, la hipotesis es falsa y el atractor viene de otro
+    #     sitio.
+    #
+    #     En los dos casos el experimento es informativo y en ninguno de
+    #     los dos justifica dejarlo encendido: subiria el marcador de la
+    #     carta de la lengua vaciando de sentido la ablacion.
+
     travel_scale: float = 6.0        # de distancia a coste energetico
 
     # --- mundo --------------------------------------------------------

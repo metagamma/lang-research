@@ -79,6 +79,46 @@ class Channel:
         return s, how
 
 
+def _refuerzo_por_pago(speaker, cat_s, listener, cat_l, form, payoff, cfg):
+    """DIAGNOSTICO. Rompe la regla 2: el pago refuerza el lexico.
+
+    NO ES PARTE DEL MODELO. Se activa solo con `cfg.lex_payoff > 0`, que
+    por defecto es 0.0, y ninguna corrida que se publique como resultado
+    debe tenerlo encendido.
+
+    Por que existe: la coherencia lexica de este modelo converge a 0.45
+    desde arriba y desde abajo — es un atractor, no un techo, y se lo come
+    todo (cuello de botella, amplificacion de mayorias, dos variantes de
+    mundo pequeño). La hipotesis es que ese atractor lo produce
+    precisamente el aislamiento entre lexico y recompensa: como nada
+    empuja al lexico hacia el acuerdo salvo la co-observacion, que es
+    local, el sistema se equilibra con varias variantes vivas.
+
+    Esta funcion abre esa via y solo esa: si la palabra llevo a comer, se
+    refuerza; si llevo a intoxicarse, se castiga. Es el atajo que toda la
+    literatura de emergent communication usa por defecto — el canal esta
+    dentro del lazo de recompensa — y que este proyecto rechazo desde el
+    primer dia para que la ablacion no fuera circular.
+
+    Lo que se compra y lo que se paga, dicho antes de mirar el resultado:
+    si la coherencia se despega de 0.45 sabremos que ese numero es el
+    PRECIO de la regla 2. Y sabremos tambien que el precio de romperla es
+    que `ablation` deja de medir nada, porque el lenguaje habria entrado
+    en la funcion de recompensa que la ablacion compara.
+    """
+    exito = payoff >= 0
+    fuerza = min(3, 1 + int(abs(payoff) * cfg.lex_payoff))
+    for who, own in ((speaker, cat_s), (listener, cat_l)):
+        if own is None:
+            continue
+        lex = who.gram.cat
+        if exito:
+            for _ in range(fuerza):
+                lex.reward(form, own)
+        else:
+            lex.penalize(form, own, factor=cfg.uptake_penalty)
+
+
 def _kin_payback(speaker, listener_delta, listener_died, cfg):
     d = cfg.kin_share * listener_delta
     if listener_died:
@@ -281,6 +321,9 @@ def forage_episode(world, speaker, listener, channel, cfg, rng, gen, acc):
         for w, own in ((speaker, cat_s), (listener, cat_l)):
             w.remember(act, own, None, thing.place, gen, abs(thing.payoff))
             w.learn_role(act, 0, thing.payoff)
+        if cfg.lex_payoff and form:
+            _refuerzo_por_pago(speaker, cat_s, listener, cat_l,
+                               form, thing.payoff, cfg)
     else:
         _uptake_feedback(speaker, form, msg, cfg)
 
