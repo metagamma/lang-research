@@ -910,10 +910,21 @@ Eso hace el 14/20 de Uqbar más frágil de lo que parecía: no es un idioma
 al que le falten seis cosas, es un punto concreto de un tira y afloja
 donde acercarse a un criterio aleja de otros.
 
-*Hipótesis abierta:* con 52 tipos en vez de 17, puede que 55 generaciones
-sean proporcionalmente pocas — los dialectos y el cambio necesitan una
-lengua estable de la que separarse. Comprobable con la misma auditoría a
-130 generaciones.
+*Hipótesis puesta a prueba, y FALSADA.* Sospeché que 55 generaciones eran
+pocas para un mundo tres veces mayor y que la vitalidad volvería con
+tiempo. La misma auditoría a **130 generaciones** da otra vez **11/20**:
+
+| | setas 55g | setas 130g |
+|---|---|---|
+| convencionalidad | 11/12 | **12/12** |
+| cambio semántico | 6/12 | **1/12** |
+| creatividad | 0/12 | 0/12 |
+| variación | 7/12 | 7/12 |
+
+Más tiempo no devuelve la vitalidad: la quita. El cambio semántico se
+desploma mientras el acuerdo se perfecciona. **El compromiso entre acuerdo
+y vitalidad es una propiedad del modelo**, medida en dos horizontes
+temporales con 12 semillas cada uno, no un artefacto de medir pronto.
 
 ### La regla 2 no era el precio de nada
 
@@ -930,6 +941,11 @@ producía ese aislamiento.
 |---|---|---|
 | 0.0 (regla intacta) | 0.467 | 0.323 |
 | 0.5 (regla rota) | **0.409** | **0.236** |
+| 1.5 (regla muy rota) | **0.412** | **0.226** |
+
+El daño **satura**: los dos brazos rotos dan lo mismo. No hay dosis buena,
+no es que poco ayude y mucho estorbe. La vía está cerrada en todo su
+rango.
 
 **Romper la regla no despega la coherencia: la baja**, y hunde la
 composicionalidad. La hipótesis era falsa.
