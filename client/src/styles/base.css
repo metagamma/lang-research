@@ -1,0 +1,21 @@
+:root {
+  /* El color de las señales es SEMANTICO, no estetico. */
+  --sig-ok:      #2e9e5b;   /* entendida y acertada */
+  --sig-fallo:   #d98324;   /* entendida y fallada  */
+  --sig-perdida: #8a8f98;   /* no entendida         */
+
+  --fondo: #ffffff;
+  --tinta: #1b1d21;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root { --fondo: #14161a; --tinta: #e7e9ee; }
+}
+
+body {
+  margin: 0;
+  padding: 1rem 1.25rem;
+  background: var(--fondo);
+  color: var(--tinta);
+  font: 15px/1.5 system-ui, sans-serif;
+}
