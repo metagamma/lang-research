@@ -11,3 +11,6 @@ dist/
 # datos generados por --export: se regeneran, no se versionan
 client/public/data/*.json
 client/public/data/*.jsonl
+
+# log del servidor en vivo: cambia sin parar, no es un resultado
+data/live.log
