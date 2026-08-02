@@ -16,8 +16,23 @@ via por la que aparecen los prestamos.
 
 from collections import Counter
 
+import numpy as np
+
 from .agent import Agent
 from .episodes import forage_episode, alarm_episode
+
+
+def _vecino(a, pool, rng, k):
+    """Uno de los k mas cercanos. Con quien te cruzas depende de donde estas."""
+    otros = [b for b in pool if b is not a]
+    if not otros:
+        return None
+    if len(otros) <= k:
+        return rng.choice(otros)
+    P = np.stack([b.pos for b in otros])
+    d = ((P - a.pos) ** 2).sum(1)
+    idx = np.argpartition(d, k)[:k]
+    return otros[int(rng.choice(idx.tolist()))]
 
 
 class Tribe:
@@ -56,7 +71,10 @@ class Tribe:
             pool = self.living()
             if len(pool) < 2:
                 break
-            speaker, listener = rng.sample(pool, 2)
+            speaker = rng.choice(pool)
+            listener = _vecino(speaker, pool, rng, cfg.near_k)
+            if listener is None:
+                continue
             if es_alarma:
                 rec = alarm_episode(world, speaker, listener, channel,
                                     cfg, rng, gen, acc)
@@ -73,6 +91,7 @@ class Tribe:
         for a in self.agents:
             if not a.alive:
                 continue
+            a.wander(self.rng)
             a.age += 1
             a.gain(-cfg.metabolic_cost)
             if a.alive and a.age > cfg.max_age:

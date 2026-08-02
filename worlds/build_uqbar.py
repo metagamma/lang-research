@@ -44,14 +44,23 @@ D = {name: i for i, (_, name) in enumerate(SENSES)}
 # Seis lugares. El coste de llegar es lo que hace que DONDE esta algo sea
 # informacion util y no adorno: sin coste, el lugar no cambiaria ninguna
 # decision y no habria razon para nombrarlo.
+# FASE 9: los lugares tienen COORDENADAS, no solo un coste escalar.
+# El coste de ir a algo pasa a salir de la distancia real, y la cercania
+# decide quien se encuentra con quien. Sin esto, cualquier par de la tribu
+# se cruzaba con la misma probabilidad y todos acababan viendolo todo —
+# que es exactamente lo que dejo sin nicho a la transmision cultural.
 PLACES = [
-    ("junto", 0.4), ("vega", 1.3), ("valle", 2.2),
-    ("loma", 3.2), ("bosque", 4.3), ("lejos", 5.4),
+    ("junto",  0.4, 0.50, 0.50),
+    ("vega",   1.3, 0.22, 0.60),
+    ("valle",  2.2, 0.75, 0.35),
+    ("loma",   3.2, 0.60, 0.85),
+    ("bosque", 4.3, 0.15, 0.18),
+    ("lejos",  5.4, 0.88, 0.82),
 ]
 
 
 def kind(name, base, affordance, payoff, abundance, spread=0.055,
-         fija=False, **deltas):
+         fija=False, regiones=None, **deltas):
     v = list(base)
     for dim, delta in deltas.items():
         v[D[dim]] = round(min(1.0, max(0.0, v[D[dim]] + delta)), 4)
@@ -59,6 +68,11 @@ def kind(name, base, affordance, payoff, abundance, spread=0.055,
          "affordance": affordance, "payoff": payoff, "abundance": abundance}
     if fija:
         d["fixed_abundance"] = True
+    if regiones is not None:
+        # Solo crece en estas regiones. Es lo que reparte el SABER por
+        # geografia: quien no ha estado en el bosque no ha visto nunca lo
+        # que crece alli, y solo puede enterarse si alguien se lo cuenta.
+        d["regions"] = list(regiones)
     return d
 
 
@@ -84,7 +98,7 @@ KINDS = [
          acritud=+0.32, amargor=+0.28, dureza=-0.22),
 
     # --- agua: la salobre solo se delata por el gusto ------------------
-    kind("charca",        AGUA,  WATER, +4.0, 0.90),
+    kind("charca",        AGUA,  WATER, +4.0, 0.90, regiones=[1, 2, 0]),
     kind("charca_salobre", AGUA, TOXIC, -5.0, 0.40,
          salinidad=+0.38, amargor=+0.22),
 
@@ -104,7 +118,7 @@ KINDS = [
          dulzor=+0.22, luminosidad=-0.15),
 
     # --- hongos: la trampa mas cara del mundo --------------------------
-    kind("hongo",         HONGO, FOOD,  +7.0, 0.55),
+    kind("hongo",         HONGO, FOOD,  +7.0, 0.55, regiones=[4, 1]),
     kind("hongo_palido",  HONGO, TOXIC, -12.0, 0.38,
          luminosidad=+0.30, amargor=+0.25, dulzor=-0.18),
 
@@ -136,7 +150,7 @@ KINDS = [
     # que cada individuo casi nunca lo prueba. Esa es la ventana.
     kind("veneno_raro",
          [0.15, 0.10, 0.90, 0.15, 0.85, 0.80, 0.85, 0.45, 0.15],
-         TOXIC, -22.0, 0.01, spread=0.050, fija=True),
+         TOXIC, -22.0, 0.06, spread=0.050, fija=True, regiones=[4]),
 
     # --- insectos: la larva alimenta, el enjambre pica -----------------
     kind("larva",         INSECTO, FOOD, +5.0, 0.50),
@@ -210,7 +224,8 @@ def main():
         "expected_payoff": round(ev, 3),
         "toxic_calibration": round(factor, 4),
         "senses": [list(s) for s in SENSES],
-        "places": [{"name": n, "cost": c} for n, c in PLACES],
+        "places": [{"name": n, "cost": c, "x": x, "y": y}
+                   for n, c, x, y in PLACES],
         "kinds": KINDS,
     }
     out = os.path.join(os.path.dirname(os.path.abspath(__file__)), "uqbar.json")
@@ -218,8 +233,10 @@ def main():
         json.dump(spec, fh, ensure_ascii=False, indent=2)
 
     print(f"escrito {out}")
-    print(f"  {len(KINDS)} tipos en 8 familias, {len(PLACES)} lugares, "
-          f"{len(SENSES)} sentidos")
+    loc = [k["name"] for k in KINDS if "regions" in k]
+    print(f"  {len(KINDS)} tipos en 8 familias, {len(PLACES)} lugares con "
+          f"coordenadas, {len(SENSES)} sentidos")
+    print(f"  tipos LOCALIZADOS (solo en ciertas regiones): {', '.join(loc)}")
     tox = sum(k["abundance"] for k in KINDS if k["affordance"] == TOXIC)
     tot = sum(k["abundance"] for k in KINDS if k["affordance"] != PREDATOR)
     print(f"  pago esperado a ciegas: {ev:+.3f}  "

@@ -4,7 +4,7 @@
   "note": "El mundo. Contiene FISICA, no significados: vectores sensoriales, afordancias y costes. Los campos 'name' existen SOLO para las metricas -- ningun agente los ve jamas. Meter aqui palabras, conceptos o enseñanzas seria regalarle al modelo justo lo que debe emerger.",
   "design": "Cada familia sensorial contiene una trampa: un par casi indistinguible con afordancias opuestas. Es el motor de la formacion de conceptos.",
   "expected_payoff": 2.25,
-  "toxic_calibration": 0.5734,
+  "toxic_calibration": 0.5254,
   "senses": [
     [
       "vista",
@@ -46,27 +46,39 @@
   "places": [
     {
       "name": "junto",
-      "cost": 0.4
+      "cost": 0.4,
+      "x": 0.5,
+      "y": 0.5
     },
     {
       "name": "vega",
-      "cost": 1.3
+      "cost": 1.3,
+      "x": 0.22,
+      "y": 0.6
     },
     {
       "name": "valle",
-      "cost": 2.2
+      "cost": 2.2,
+      "x": 0.75,
+      "y": 0.35
     },
     {
       "name": "loma",
-      "cost": 3.2
+      "cost": 3.2,
+      "x": 0.6,
+      "y": 0.85
     },
     {
       "name": "bosque",
-      "cost": 4.3
+      "cost": 4.3,
+      "x": 0.15,
+      "y": 0.18
     },
     {
       "name": "lejos",
-      "cost": 5.4
+      "cost": 5.4,
+      "x": 0.88,
+      "y": 0.82
     }
   ],
   "kinds": [
@@ -104,7 +116,7 @@
       "spread": 0.055,
       "affordance": "toxico",
       "payoff": -10.0,
-      "abundance": 0.344
+      "abundance": 0.3152
     },
     {
       "name": "raiz",
@@ -140,7 +152,7 @@
       "spread": 0.055,
       "affordance": "toxico",
       "payoff": -8.0,
-      "abundance": 0.2408
+      "abundance": 0.2207
     },
     {
       "name": "charca",
@@ -158,7 +170,12 @@
       "spread": 0.055,
       "affordance": "agua",
       "payoff": 4.0,
-      "abundance": 0.9
+      "abundance": 0.9,
+      "regions": [
+        1,
+        2,
+        0
+      ]
     },
     {
       "name": "charca_salobre",
@@ -176,7 +193,7 @@
       "spread": 0.055,
       "affordance": "toxico",
       "payoff": -5.0,
-      "abundance": 0.2294
+      "abundance": 0.2102
     },
     {
       "name": "bestia",
@@ -248,7 +265,7 @@
       "spread": 0.055,
       "affordance": "toxico",
       "payoff": -6.0,
-      "abundance": 0.172
+      "abundance": 0.1576
     },
     {
       "name": "flor",
@@ -302,7 +319,11 @@
       "spread": 0.055,
       "affordance": "alimento",
       "payoff": 7.0,
-      "abundance": 0.55
+      "abundance": 0.55,
+      "regions": [
+        4,
+        1
+      ]
     },
     {
       "name": "hongo_palido",
@@ -320,7 +341,7 @@
       "spread": 0.055,
       "affordance": "toxico",
       "payoff": -12.0,
-      "abundance": 0.2179
+      "abundance": 0.1996
     },
     {
       "name": "veneno_raro",
@@ -338,8 +359,11 @@
       "spread": 0.05,
       "affordance": "toxico",
       "payoff": -22.0,
-      "abundance": 0.01,
-      "fixed_abundance": true
+      "abundance": 0.06,
+      "fixed_abundance": true,
+      "regions": [
+        4
+      ]
     },
     {
       "name": "larva",
@@ -375,7 +399,7 @@
       "spread": 0.055,
       "affordance": "toxico",
       "payoff": -4.0,
-      "abundance": 0.258
+      "abundance": 0.2364
     }
   ]
 }

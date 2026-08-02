@@ -142,7 +142,15 @@ def _teach_past(listener, speaker, form, msg, memrec, acc, quoted=False):
 # ---------------------------------------------------------------------
 
 def forage_episode(world, speaker, listener, channel, cfg, rng, gen, acc):
-    thing = world.sample_thing()
+    # Fase 9: lo que aparece depende de DONDE esta el hablante. Quien no
+    # pisa el bosque no ve lo que crece en el bosque, y por eso su unica
+    # via de enterarse es que alguien se lo cuente.
+    region = world.region_de(speaker.pos)
+    thing = world.sample_thing(region)
+    # y el coste de ir es la distancia real del oyente, no una constante
+    import numpy as _np
+    thing.travel = float(_np.linalg.norm(
+        listener.pos - world.coords[region])) * cfg.travel_scale
     rec = {"type": "forage", "kind": thing.kind.name, "place": thing.place,
            "afford": thing.affordance, "signal": None, "said": None,
            "acted": False, "optimal": None, "chose_well": None,
@@ -296,6 +304,7 @@ def _uptake_feedback(speaker, form, msg, cfg):
 
 def alarm_episode(world, speaker, listener, channel, cfg, rng, gen, acc):
     thing = world.sample_predator()
+    thing.place = world.region_de(speaker.pos)
     rec = {"type": "alarm", "kind": thing.kind.name, "place": thing.place,
            "afford": thing.affordance, "signal": None, "said": None,
            "acted": False, "optimal": True, "chose_well": None,

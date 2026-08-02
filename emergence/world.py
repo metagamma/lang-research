@@ -53,15 +53,17 @@ class Kind:
     """Tipo latente. Los agentes no tienen acceso a esto."""
 
     __slots__ = ("name", "prototype", "spread", "affordance", "payoff",
-                 "abundance")
+                 "abundance", "regions")
 
-    def __init__(self, name, prototype, spread, affordance, payoff, abundance):
+    def __init__(self, name, prototype, spread, affordance, payoff, abundance,
+                 regions=None):
         self.name = name
         self.prototype = np.asarray(prototype, dtype=float)
         self.spread = spread
         self.affordance = affordance
         self.payoff = payoff          # delta de energia al consumir
         self.abundance = abundance    # peso de muestreo
+        self.regions = regions        # None = crece en todas partes
 
     def sample(self, rng):
         return np.clip(self.prototype + rng.noise(len(self.prototype),
@@ -90,8 +92,20 @@ class WorldSpec:
         self.senses = [tuple(s) for s in data["senses"]]
         self.dim = len(self.senses)
         self.places = [(p["name"], float(p["cost"])) for p in data["places"]]
+        # Fase 9: coordenadas. Si el mundo no las trae, se colocan en
+        # circulo por coste — un mundo viejo sigue cargando.
+        import math as _m
+        self.coords = []
+        for i, p in enumerate(data["places"]):
+            if "x" in p and "y" in p:
+                self.coords.append((float(p["x"]), float(p["y"])))
+            else:
+                a = 2 * _m.pi * i / max(1, len(data["places"]))
+                r = 0.1 + 0.4 * float(p["cost"]) / 6.0
+                self.coords.append((0.5 + r * _m.cos(a), 0.5 + r * _m.sin(a)))
         self.kinds = [Kind(k["name"], k["prototype"], k["spread"],
-                           k["affordance"], k["payoff"], k["abundance"])
+                           k["affordance"], k["payoff"], k["abundance"],
+                           k.get("regions"))
                       for k in data["kinds"]]
         for k in self.kinds:
             if len(k.prototype) != self.dim:
@@ -121,6 +135,14 @@ class World:
         self.n_places = self.spec.n_places
         self.place_names = [n for n, _ in self.spec.places]
         self.place_costs = [c for _, c in self.spec.places]
+        self.coords = np.asarray(self.spec.coords, dtype=float)
+        # que puede aparecer en cada region
+        self._por_region = []
+        for r in range(self.n_places):
+            self._por_region.append(
+                [k for k in self.kinds
+                 if k.affordance != PREDATOR
+                 and (k.regions is None or r in k.regions)])
         self._prey = [k for k in self.kinds if k.affordance != PREDATOR]
         self._pred = [k for k in self.kinds if k.affordance == PREDATOR]
         if not self._prey or not self._pred:
@@ -145,12 +167,29 @@ class World:
                 return k
         return pool[-1]
 
-    def _instance(self, k):
-        pl = self.rng.randrange(self.n_places)
+    def _instance(self, k, pl=None):
+        if pl is None:
+            pl = self.rng.randrange(self.n_places)
         return Thing(k.sample(self.rng), k, pl, self.place_costs[pl])
 
-    def sample_thing(self):
-        return self._instance(self._pick(self._prey, self._prey_w))
+    def region_de(self, pos):
+        """La region mas cercana a una posicion."""
+        d = ((self.coords - pos) ** 2).sum(1)
+        return int(d.argmin())
+
+    def sample_thing(self, place=None):
+        """Algo que aparece. Si se da region, solo lo que crece alli.
+
+        Ahi esta el reparto del saber: quien no ha pisado el bosque no ha
+        visto nunca lo que crece en el bosque.
+        """
+        if place is None:
+            return self._instance(self._pick(self._prey, self._prey_w))
+        pool = self._por_region[place]
+        if not pool:
+            return self._instance(self._pick(self._prey, self._prey_w), place)
+        cum = self._cumulative(pool)
+        return self._instance(self._pick(pool, cum), place)
 
     def sample_predator(self):
         return self._instance(self._pick(self._pred, self._pred_w))

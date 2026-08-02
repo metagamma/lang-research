@@ -68,6 +68,10 @@ class Agent:
         #     rastro: casi todo acaba viviendose, y entonces parece que el
         #     testimonio nunca enseño nada aunque hubiera llegado antes.
         self.place_cost = {}   # lugar -> lo que cuesta llegar (se aprende andando)
+        # Fase 9: posicion en el mundo. Deja de ser cierto que cualquier
+        # par de la tribu se encuentre con la misma probabilidad, y eso
+        # reparte el saber: cada uno ve lo que crece donde anda.
+        self.pos = np.array([rng.random(), rng.random()])
         self.memory = Memory(cfg.memory_events)   # sucesos presenciados
         # Que papel de cada tipo de suceso carga con el pago. NO se lo
         # decimos: lo aprende viendo sucesos de primera mano. Es lo que
@@ -129,6 +133,11 @@ class Agent:
         return cat
 
     # -- decisiones ------------------------------------------------------
+    def wander(self, rng):
+        """Deriva lenta. Ni quieto ni teletransportado."""
+        self.pos = np.clip(
+            self.pos + rng.noise(2, self.cfg.wander), 0.02, 0.98)
+
     def learn_place(self, place, cost):
         a = self.cfg.value_lr
         prev = self.place_cost.get(place)
@@ -403,6 +412,7 @@ class Agent:
         v = min(self.cfg.vigilance_max, max(self.cfg.vigilance_min, v))
         c = Agent(self.cfg, rng, vigilance=v, tribe=self.tribe)
         c.energy = self.cfg.child_energy
+        c.pos = np.clip(self.pos + rng.noise(2, 0.05), 0.02, 0.98)  # nace cerca
         # el hijo NO hereda ni categorias ni palabras: las tiene que
         # aprender viviendo. El idioma no es un genoma.
         return c

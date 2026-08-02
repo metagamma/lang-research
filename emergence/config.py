@@ -176,6 +176,16 @@ class Config:
     #     no se podria subir la densidad de conversacion sin subir a
     #     la vez la mortalidad.
 
+    # --- espacio (Fase 9) ---------------------------------------------
+    wander: float = 0.035            # cuanto deriva un agente por generacion
+    near_k: int = 4                  # con cuantos vecinos se puede encontrar
+    #   ^ el oyente sale de los `near_k` mas cercanos, no de toda la tribu.
+    #     Con grafo completo todos acababan viendolo todo y la transmision
+    #     cultural no tenia nicho. Con vecindad, el saber se reparte por
+    #     geografia. Prediccion: bajara la coherencia global (los juegos de
+    #     nombres sobre retículas forman dominios) y apareceran dialectos.
+    travel_scale: float = 6.0        # de distancia a coste energetico
+
     # --- mundo --------------------------------------------------------
     world: str = "uqbar"             # fichero en worlds/ (o ruta a un json)
     contact: int = 0                 # encuentros entre tribus por generacion
