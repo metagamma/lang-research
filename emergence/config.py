@@ -207,6 +207,27 @@ class Config:
     # --- espacio (Fase 9) ---------------------------------------------
     wander: float = 0.035            # cuanto deriva un agente por generacion
     near_k: int = 4                  # con cuantos vecinos se puede encontrar
+    p_lejano: float = 0.10           # encuentros con alguien de fuera del vecindario
+    #   ^ ENLACES DE LARGO ALCANCE (mundo pequeño). El emparejamiento por
+    #     cercania de la Fase 9 convirtio la tribu en una reticula, y la
+    #     literatura del naming game es clara al respecto: las reticulas
+    #     regulares convergen rapido en local y lentisimo en global — un
+    #     proceso de coarsening que deja fases METAESTABLES con varias
+    #     convenciones coexistiendo. Es exactamente lo que medimos:
+    #     coherencia clavada en ~0.47 con ~3 palabras vivas por cosa,
+    #     incluido un empate exacto 0.46/0.46.
+    #
+    #     Añadir una pequeña densidad de atajos de largo alcance sobre el
+    #     grafo geometrico — hacerlo un «mundo pequeño» — permite saltarse
+    #     ese coarsening. Con un matiz que tambien esta medido en la
+    #     literatura: atajos demasiado largos vuelven a frenar la
+    #     convergencia, asi que no conviene subirlo mucho.
+    #
+    #     SIN VERIFICAR. Con 2 semillas: coherencia 0.430 -> 0.420,
+    #     topsim 0.278 -> 0.309, exito 0.604 -> 0.609. Todo dentro del
+    #     ruido a esa muestra. El fundamento teorico es solido y el
+    #     mecanismo no hace daño, pero AFIRMAR que mejora exigiria una
+    #     auditoria de 12 semillas que no se ha corrido.
     #   ^ el oyente sale de los `near_k` mas cercanos, no de toda la tribu.
     #     Con grafo completo todos acababan viendolo todo y la transmision
     #     cultural no tenia nicho. Con vecindad, el saber se reparte por

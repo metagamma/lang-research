@@ -22,11 +22,19 @@ from .agent import Agent
 from .episodes import forage_episode, alarm_episode
 
 
-def _vecino(a, pool, rng, k):
-    """Uno de los k mas cercanos. Con quien te cruzas depende de donde estas."""
+def _vecino(a, pool, rng, k, p_lejano=0.0):
+    """Uno de los k mas cercanos — o, de vez en cuando, alguien de lejos.
+
+    Los encuentros de largo alcance son pocos pero decisivos: sin ellos la
+    tribu es una reticula y la convergencia lexica se atasca en un estado
+    metaestable con varias convenciones vivas a la vez. Con ellos, una
+    convencion mayoritaria puede saltar de un vecindario a otro.
+    """
     otros = [b for b in pool if b is not a]
     if not otros:
         return None
+    if p_lejano and rng.random() < p_lejano:
+        return rng.choice(otros)          # atajo: cualquiera de la tribu
     if len(otros) <= k:
         return rng.choice(otros)
     P = np.stack([b.pos for b in otros])
@@ -72,7 +80,7 @@ class Tribe:
             if len(pool) < 2:
                 break
             speaker = rng.choice(pool)
-            listener = _vecino(speaker, pool, rng, cfg.near_k)
+            listener = _vecino(speaker, pool, rng, cfg.near_k, cfg.p_lejano)
             if listener is None:
                 continue
             if es_alarma:
