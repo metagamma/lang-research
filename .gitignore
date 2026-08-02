@@ -6,3 +6,4 @@ dist/
 
 # documentacion de trabajo: no se publica
 *.md
+!emergence/README.md
