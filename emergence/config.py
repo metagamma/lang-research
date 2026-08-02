@@ -52,6 +52,14 @@ class Config:
     #     de verdad: por numero de hablantes, no por frecuencia bruta.
     lex_prune: float = 0.05          # peso por debajo del cual se olvida
     lex_confidence: float = 0.55     # peso minimo para fiarse de lo que oyes
+    pragmatica: float = 0.6          # cuanto pesa el contexto al desambiguar
+    contexto_min: int = 12           # observaciones minimas para opinar del sitio
+    #   ^ FASE 10. Una forma polisemica no significa siempre lo mismo: el
+    #     oyente sabe DONDE esta pasando la conversacion, y sabe por
+    #     experiencia que cosas salen en cada sitio. Si `vrera` cubre el
+    #     fruto dulce y el amargo, y en esta region solo ha visto el dulce,
+    #     lo razonable es leer «dulce». A 0 se ablaciona: vuelve a ganar
+    #     siempre el significado de mas peso, sea cual sea la situacion.
     p_invent: float = 0.85           # prob. de acuñar si quiere hablar y no tiene forma
     listen_before_speak: int = 0     # señales que hay que oir antes de acuñar
     #   ^ la idea era que la comprension precediera a la produccion: un

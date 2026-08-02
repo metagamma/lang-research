@@ -75,7 +75,7 @@ class Lexicon:
                 best, bs = f, v
         return best
 
-    def best_for(self, form):
+    def best_for(self, form, contexto=None):
         """(significado, peso) mas fuerte de esa forma, sin exigir confianza.
 
         `interpret` calla cuando no esta seguro, que es lo correcto para
@@ -88,28 +88,46 @@ class Lexicon:
         cats = self.by_form.get(form)
         if not cats:
             return None, 0.0
-        best, bw = None, -1.0
+        e = self.cfg.pragmatica
+        best, bw, bruto = None, -1.0, 0.0
         for c in cats:
             v = self.w[(form, c)]
-            if v > bw:
-                best, bw = c, v
-        return best, bw
+            s = v * (1.0 + e * contexto(c)) if (e and contexto) else v
+            if s > bw:
+                best, bw, bruto = c, s, v
+        return best, bruto
 
-    def interpret(self, form):
+    def interpret(self, form, contexto=None):
         """La categoria mas fuerte para esa forma, si supera la confianza.
 
         Devolver None significa "he oido algo pero no se de que habla":
         el oyente cae entonces en exploracion, no en una decision segura.
+
+        CONTEXTO (Fase 10). `contexto` es una funcion cat -> plausibilidad
+        en la situacion actual. Una forma polisemica deja de significar
+        siempre lo mismo: si `vrera` cubre el fruto dulce y el amargo, y
+        aqui solo salen dulces, se lee «dulce».
+
+        Esto es pragmatica en el sentido estricto — el significado de la
+        MISMA señal cambia con la situacion — y no hace falta ningun
+        mecanismo nuevo: la polisemia ya existia y el oyente ya sabia
+        donde esta. Solo faltaba dejarle usar lo segundo para resolver lo
+        primero.
         """
         cats = self.by_form.get(form)
         if not cats:
             return None
-        best, bw = None, -1.0
+        e = self.cfg.pragmatica
+        best, bw, bruto = None, -1.0, 0.0
         for c in cats:
             v = self.w[(form, c)]
-            if v > bw:
-                best, bw = c, v
-        return best if bw >= self.cfg.lex_confidence else None
+            s = v * (1.0 + e * contexto(c)) if (e and contexto) else v
+            if s > bw:
+                best, bw, bruto = c, s, v
+        # la confianza se mide sobre el peso REAL, no sobre el realzado:
+        # el contexto ayuda a elegir entre candidatas, no a fabricar
+        # certeza donde no la hay.
+        return best if bruto >= self.cfg.lex_confidence else None
 
     def invent(self, cat):
         form = coin(self.rng)

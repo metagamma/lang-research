@@ -46,10 +46,24 @@ COMIO = 1    # alguien se alimento de algo
 DAÑO = 2     # algo hizo daño al ser comido
 MATO = 3     # algo acabo con alguien
 DIJO = 4     # alguien conto ESTO -> su argumento es OTRO SUCESO (Fase 7)
-ACTIONS = (HAY, COMIO, DAÑO, MATO, DIJO)
+SEDICE = 5   # «esta palabra significa esto» -> su argumento es una FORMA
+ACTIONS = (HAY, COMIO, DAÑO, MATO, DIJO, SEDICE)
 ACTION_NAME = {HAY: "hay", COMIO: "comio", DAÑO: "daño", MATO: "mato",
-               DIJO: "dijo"}
-ARITY = {HAY: 1, COMIO: 1, DAÑO: 1, MATO: 1, DIJO: 1}
+               DIJO: "dijo", SEDICE: "se dice"}
+ARITY = {HAY: 1, COMIO: 1, DAÑO: 1, MATO: 1, DIJO: 1, SEDICE: 1}
+
+# SEDICE es el unico suceso cuyo argumento no es una cosa del mundo ni un
+# suceso, sino UNA PALABRA. Con el, la lengua puede hablar de si misma:
+#
+#     [forma] [marca] [descripcion]     «esto se dice: verde, amargo»
+#
+# Sirve para dos cosas a la vez, y por eso vale la pena. Es metalenguaje
+# — el sistema refiriendose a sus propios signos — y es tambien la unica
+# via por la que los morfos ATRIBUTIVOS pueden negociarse: hasta ahora
+# nacian por metafora y nadie los ponia jamas en juego, asi que el
+# solapamiento entre inventarios se quedaba en 0.087 mientras el de los
+# nombres llegaba a 0.64. Enseñar una palabra los mete en el circuito de
+# co-observacion que alinea todo lo demas.
 
 # DIJO es la unica accion cuyo argumento no es una categoria sino un
 # suceso entero. Ahi esta la recursividad: la misma estructura dentro de

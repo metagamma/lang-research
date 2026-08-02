@@ -157,7 +157,7 @@ def forage_episode(world, speaker, listener, channel, cfg, rng, gen, acc):
            "understood": False, "parsed": None, "novel": None,
            "past": False, "testimony": False, "quoted": False,
            "quote_ok": False, "descrito": False, "desc_ok": False,
-           "concepto_nuevo": False}
+           "concepto_nuevo": False, "ensenanza": False, "aprendida": False}
 
     px = speaker.perceive(thing)
     cat_s = speaker.concepts.categorize(px)
@@ -168,6 +168,7 @@ def forage_episode(world, speaker, listener, channel, cfg, rng, gen, acc):
     if msg is not None:
         rec["novel"] = not speaker.gram.knows_whole(msg)
     form, how = channel.transmit(speaker, msg) if msg else (None, None)
+    rec["_meaning"] = msg          # para poder glosar la oracion
 
     # Si no se fia de su palabra, DESCRIBE en vez de nombrar. Es lo que
     # cierra el bucle: sin emitirlas en episodios reales, las piezas
@@ -191,7 +192,9 @@ def forage_episode(world, speaker, listener, channel, cfg, rng, gen, acc):
     # --- oyente: a ciegas, salvo por lo que oiga ---
     heard = parsed = None
     if form and not rec["descrito"]:
-        heard, parsed = listener.gram.parse(form)
+        # el oyente sabe DONDE pasa esto y que suele salir alli
+        heard, parsed = listener.gram.parse(
+            form, contexto=listener.contexto_de(region))
     rec["parsed"] = parsed
 
     cat_heard = place_heard = None
@@ -227,13 +230,27 @@ def forage_episode(world, speaker, listener, channel, cfg, rng, gen, acc):
     if (channel.mode == MODE_LANGUAGE and not approach and not is_past
             and not rec["descrito"] and cat_heard is None
             and speaker.wants_to_speak(cat_s)):
-        reparacion = speaker.describe(cat_s, world.spread(rng), forzar=True)
+        # Primero se intenta ENSEÑAR la palabra («esto se dice X: verde,
+        # amargo»); si no se puede, se describe a secas. Enseñar deja al
+        # otro con la palabra, no solo con el mensaje de hoy.
+        reparacion = speaker.ensenar_palabra(cat_s, world.spread(rng))
+        ensenanza = reparacion is not None
+        if reparacion is None:
+            reparacion = speaker.describe(cat_s, world.spread(rng), forzar=True)
         if reparacion is not None:
             form, rec["descrito"], rec["said"] = reparacion, True, "desc"
             rec["signal"] = reparacion
             speaker.energy -= cfg.speak_cost
+            if ensenanza:
+                rec["ensenanza"] = True
+                rec["aprendida"] = listener.aprender_ensenanza(
+                    reparacion, world.spread(rng), world.medio(rng))
+                leido = listener.gram.leer_ensenanza(reparacion)
+                resto = leido[1] if leido else reparacion
+            else:
+                resto = reparacion
             c, nuevo = listener.understand_description(
-                reparacion, world.spread(rng), world.medio(rng))
+                resto, world.spread(rng), world.medio(rng))
             rec["desc_ok"] = c is not None
             rec["concepto_nuevo"] = nuevo
             if c is not None:
@@ -247,6 +264,8 @@ def forage_episode(world, speaker, listener, channel, cfg, rng, gen, acc):
 
     py = listener.perceive(thing)
     cat_l = listener.concepts.categorize(py)
+    speaker.anotar_region(cat_s, region)
+    listener.anotar_region(cat_l, region)
 
     if approach:
         listener.gain(-thing.travel)
@@ -318,6 +337,7 @@ def alarm_episode(world, speaker, listener, channel, cfg, rng, gen, acc):
     if speaker.wants_to_speak(cat_s):
         rec["novel"] = not speaker.gram.knows_whole(msg)
         form, how = channel.transmit(speaker, msg)
+        rec["_meaning"] = msg
     else:
         form, how = None, None
     rec["signal"], rec["said"] = form, how

@@ -260,13 +260,59 @@ def recursividad(rates, agents):
               f"{marca:.0%} de los agentes tienen complementante")
 
 
+def metalinguistica(rates, agents):
+    """16. Metalinguistica: la lengua hablando de sus propios signos.
+
+    Se mide el acto «[palabra] se-dice [descripcion]»: cuantos se emiten y
+    en cuantos el oyente se queda con la palabra. Que exista el mecanismo
+    no basta — si nadie lo aprende, hay codigo y no metalenguaje.
+    """
+    m = rates.get("meta_rate", 0.0)
+    ok = rates.get("meta_learned", 0.0)
+    if m < 0.002:
+        return _f("metalingüistica", NO, m, "el acto existe pero no se usa")
+    v = SI if (m >= 0.01 and ok >= 0.15) else PARCIAL
+    return _f("metalingüistica", v, ok,
+              f"{m:.1%} de los enunciados enseñan una palabra "
+              f"(«esto se dice X: verde, amargo»); el oyente se la queda "
+              f"en el {ok:.1%} de los casos")
+
+
+def pragmatica(agents, world):
+    """8. Pragmatica: el contexto cambia la interpretacion.
+
+    No basta con que el mecanismo este puesto: se comprueba si alguna
+    forma polisemica se LEE distinto segun la region. Cero significa que
+    no hay ambigüedad real que resolver, por mucho contexto que se mire.
+    """
+    if not agents:
+        return _f("pragmatica", NM, 0.0, "sin poblacion")
+    cambian = total = 0
+    for a in agents:
+        voc = a.gram.voc[V_CAT]
+        for forma, cats in voc.by_form.items():
+            if len(cats) < 2:
+                continue
+            total += 1
+            lecturas = set()
+            for reg in range(world.n_places):
+                ctx = a.contexto_de(reg)
+                if ctx is None:
+                    continue
+                c, _ = voc.best_for(forma, ctx)
+                if c is not None:
+                    lecturas.add(c)
+            if len(lecturas) > 1:
+                cambian += 1
+    frac = cambian / max(1, total)
+    v = SI if frac >= 0.05 else (PARCIAL if frac > 0.005 else NO)
+    return _f("pragmatica", v, frac,
+              f"{cambian} de {total} formas polisemicas se leen distinto "
+              f"segun donde se digan ({frac:.1%})")
+
+
 def no_implementado():
     return [
-        _f("pragmatica", NO, 0.0,
-           "la interpretacion no depende del contexto; una señal significa "
-           "lo mismo dicha por quien sea y cuando sea"),
-        _f("metalingüistica", NO, 0.0,
-           "la lengua no puede hablar de si misma"),
         _f("orden de circunstanciales", NO, 0.0,
            "lugar y tiempo van siempre al final porque lo fijamos nosotros. "
            "Solo emerge el orden de los argumentos"),
@@ -298,6 +344,8 @@ def audit(pop, world, rng, last, semantic_logs, coherence, dist):
         cambio(shifts),
         transmision_cultural(agents),
         recursividad(last, agents),
+        pragmatica(agents, world),
+        metalinguistica(last, agents),
     ]
     out.extend(no_implementado())
     return out

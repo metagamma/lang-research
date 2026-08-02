@@ -23,7 +23,7 @@ export function crearFuente (manejadores) {
 
   function conectar () {
     es = new EventSource(`${BASE}/stream`)
-    for (const canal of ['episodio', 'generacion', 'instantanea',
+    for (const canal of ['episodio', 'generacion', 'instantanea', 'oracion',
                          'corte', 'tribu_perdida', 'fin']) {
       es.addEventListener(canal, e => {
         vivo = true

@@ -140,6 +140,8 @@ class Accumulator:
         self.parsed = Counter()     # como se entendio
         self.anchor = Counter()     # como se anclo cada señal (Fase 6)
         self.past = 0               # relatos del pasado
+        self.ensenanzas = 0         # «esto se dice X» (metalenguaje)
+        self.aprendidas = 0         # ...y el oyente se quedo la palabra
         self.descrito = 0           # enunciados que son descripciones
         self.desc_ok = 0            # ...entendidas por el oyente
         self.conceptos = 0          # ...que instalaron un concepto
@@ -159,6 +161,9 @@ class Accumulator:
             self.past += 1
         if rec.get('testimony'):
             self.testimony += 1
+        if rec.get('ensenanza'):
+            self.ensenanzas += 1
+            if rec.get('aprendida'): self.aprendidas += 1
         if rec.get('descrito'):
             self.descrito += 1
             if rec.get('desc_ok'): self.desc_ok += 1
@@ -212,6 +217,8 @@ class Accumulator:
             "parsed_partial": self.parsed.get("part", 0) / sig,
             "novel_rate": self.novel / sig,
             "past_rate": self.past / e,
+            "meta_rate": self.ensenanzas / e,
+            "meta_learned": self.aprendidas / max(1, self.ensenanzas),
             "desc_rate": self.descrito / e,
             "desc_understood": self.desc_ok / max(1, self.descrito),
             "concepts_installed": self.conceptos / max(1, self.descrito),

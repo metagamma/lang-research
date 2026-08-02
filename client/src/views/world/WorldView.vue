@@ -5,7 +5,8 @@
 // que inventarse una disposicion. Ya no: los lugares tienen coordenadas y
 // los agentes posicion. Lo que se dibuja es lo que hay.
 import { onMounted, onUnmounted, ref, watch } from 'vue'
-import { mundo, episodios, tic, instantanea } from '../../core/state.js'
+import { mundo, episodios, tic, oraciones } from '../../core/state.js'
+import Oraciones from '../../components/Oraciones.vue'
 
 const lienzo = ref(null)
 const verNombres = ref(false)   // los nombres latentes, ocultos por defecto
@@ -84,7 +85,13 @@ watch(tic, () => {})
         · punteado = pasado · grueso = descripción
       </span>
     </div>
-    <canvas ref="lienzo"></canvas>
+    <div class="escena">
+      <canvas ref="lienzo"></canvas>
+      <aside>
+        <h3>Lo que se está diciendo</h3>
+        <Oraciones :oraciones="oraciones" />
+      </aside>
+    </div>
     <p class="nota">
       Posiciones reales del modelo. Cada trazo es un episodio: alguien
       dijo algo a alguien y el color cuenta cómo acabó.
@@ -93,8 +100,12 @@ watch(tic, () => {})
 </template>
 
 <style scoped>
-.mundo { display: flex; flex-direction: column; height: 78vh; }
-canvas { flex: 1; border: 1px solid rgba(128,128,128,.25); border-radius: 6px; }
+.mundo { display: flex; flex-direction: column; height: 82vh; }
+.escena { flex: 1; display: grid; grid-template-columns: 1fr 22rem;
+          gap: 1rem; min-height: 0; }
+aside { overflow-y: auto; padding-right: .3rem; }
+aside h3 { font-size: .85rem; margin: 0 0 .5rem; opacity: .8; }
+canvas { min-height: 0; border: 1px solid rgba(128,128,128,.25); border-radius: 6px; }
 .barra { display: flex; gap: 1.5rem; align-items: center; margin-bottom: .5rem;
          font-size: .82rem; flex-wrap: wrap; }
 .leyenda i { display: inline-block; width: 10px; height: 10px; border-radius: 2px;

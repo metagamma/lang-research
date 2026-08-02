@@ -42,7 +42,9 @@ from collections import deque
 
 from .config import Config
 from .episodes import Channel, MODE_LANGUAGE
+from .events import ACTION_NAME, TENSE_NAME
 from .export import snapshot
+from .syntax import ORDER_NAME
 from .fastrand import FastRandom
 from .metrics import (concept_alignment, lexical_coherence, lexicon_stats,
                       mean, prediction_score, topographic_similarity)
@@ -134,7 +136,7 @@ class Vivo:
         self.cortes = []          # generaciones donde se toco un parametro
         self.tribus_perdidas = []
         self._ultimo_envio = 0.0
-        self._enviados_seg = 0
+        self._ultima_frase = 0.0
 
     # -- grabador de episodios (interfaz de Recorder) -------------------
     def frame(self, gen, tribe, sp, li, rec):
@@ -162,6 +164,40 @@ class Vivo:
         # posiciones: la Fase 9 les dio coordenadas de verdad
         d["p"] = self._posiciones(tribe, sp, li)
         self.bus.publicar("episodio", d)
+        self._quiza_frase(ahora, gen, tribe, sp, rec, d)
+
+    def _quiza_frase(self, ahora, gen, tribe, sp, rec, d):
+        """Rescatar una oracion compuesta, segmentada y glosada.
+
+        Una cadena como `fikrodema` no dice nada a quien la ve. Partida en
+        `fi + kro + dema` y glosada como (fruto, loma, antes) se ve que es
+        una lengua y no ruido. Solo se emite una por segundo: son para
+        leerlas, no para contarlas.
+        """
+        if rec.get("said") != "comp" or ahora - self._ultima_frase < 1.0:
+            return
+        hablante = next((a for a in self.pop.tribes[tribe].living()
+                         if a.id == sp), None)
+        if hablante is None or not hasattr(hablante.gram, "glosar"):
+            return
+        m = rec.get("_meaning")
+        if m is None:
+            return
+        piezas = hablante.gram.glosar(m)
+        if not piezas or len(piezas) < 2:
+            return
+        self._ultima_frase = ahora
+        self.bus.publicar("oracion", {
+            "g": gen, "t": tribe, "sp": sp,
+            "sig": rec.get("signal"),
+            "piezas": [[mo, ra] for mo, ra, _ in piezas],
+            "orden": ORDER_NAME[hablante.gram.best_order()],
+            "cosa": rec.get("kind"),
+            "lugar": self.world.place_names[rec.get("place", 0)],
+            "accion": ACTION_NAME.get(m[0], "?"),
+            "tiempo": TENSE_NAME.get(m[4], "?"),
+            "und": bool(rec.get("understood")),
+        })
 
     def _posiciones(self, tribe, sp, li):
         out = {}

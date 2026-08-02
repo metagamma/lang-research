@@ -36,7 +36,7 @@ siempre al final, detras del nucleo. Emerge el orden de los ARGUMENTOS,
 no la posicion de los circunstanciales.
 """
 
-from .events import ACTIONS, ARITY, BEFORE, DIJO, HAY, NOW
+from .events import ACTIONS, ARITY, BEFORE, DIJO, HAY, NOW, SEDICE
 from .lexicon import Lexicon
 from .phonology import coin
 
@@ -80,6 +80,7 @@ class Syntax:
         self.produced = {HOLISTIC: 0, COMPOSED: 0}
         self.clouds = {}   # morfo -> nube sensorial (solo sonda)
         self.speaker_actual = None   # de quien es lo que estoy oyendo
+        self._ctx = None             # plausibilidad por situacion (Fase 10)
         self.parsed = {HOLISTIC: 0, COMPOSED: 0, PARTIAL: 0}
 
     def record_cloud(self, pieza, percept):
@@ -217,8 +218,9 @@ class Syntax:
         return False
 
     # -- comprension ----------------------------------------------------
-    def parse(self, s, _d=0, count=True):
+    def parse(self, s, _d=0, count=True, contexto=None):
         """(significado, modo). El significado puede tener huecos a None."""
+        self._ctx = contexto            # lo consulta _scan al desambiguar
         m = self.hol.interpret(s)
         if m is not None:
             if count:
@@ -297,7 +299,7 @@ class Syntax:
                     piece = s[i:j]
                     if piece not in forms:
                         continue
-                    v, weight = voc.best_for(piece)
+                    v, weight = voc.best_for(piece, self._ctx if vi == V_CAT else None)
                     if v is not None:
                         h.setdefault(i, []).append((j, v, weight))
         return hits
@@ -361,6 +363,75 @@ class Syntax:
         if m[S_ACT] is None:
             m[S_ACT] = HAY
         return tuple(m)
+
+    SLOT_NOMBRE = {S_ACT: "accion", S_ARG1: "cosa", S_ARG2: "cosa2",
+                   S_PLACE: "lugar", S_TENSE: "tiempo"}
+
+    def glosar(self, m):
+        """Descompone lo que este agente diria, pieza a pieza.
+
+        Devuelve [(morfo, ranura, valor)] o None si no lo construye por
+        composicion. Es la misma logica de `express`, expuesta para poder
+        ENSEÑAR la oracion segmentada en vez de una cadena opaca.
+
+        No calcula nada nuevo ni altera nada: es una ventana a lo que el
+        agente ya hace.
+        """
+        if self._is_quote(m):
+            marca = self.voc[V_ACT].produce(DIJO)
+            dentro = self.glosar(m[S_ARG1])
+            if marca is None or dentro is None:
+                return None
+            return [(marca, "cita", "dijo que")] + dentro
+        # NO se abandona si existe una forma holistica fuerte. Se llama a
+        # esto sabiendo que el enunciado SE CONSTRUYO por composicion; y
+        # para cuando llega la llamada, la co-observacion del propio
+        # episodio ya ha reforzado el bloque entero. Mirar el estado de
+        # ahora para explicar lo que se dijo antes daba None casi siempre.
+        seq = self._sequence(self.best_order(), ARITY[m[S_ACT]],
+                             mark_act=m[S_ACT] != HAY,
+                             mark_tense=m[S_TENSE] != NOW)
+        piezas = []
+        for slot in seq:
+            v = m[slot]
+            if not isinstance(v, int):
+                continue
+            morfo = self.voc[SLOT_VOC[slot]].produce(v)
+            if morfo is None:
+                return None
+            piezas.append((morfo, self.SLOT_NOMBRE.get(slot, "?"), v))
+        return piezas or None
+
+    # -- metalenguaje (Fase 11) -----------------------------------------
+    def ensenar(self, forma, descripcion):
+        """«[forma] se-dice [descripcion]». La lengua hablando de si misma.
+
+        El orden es forma-marca-descripcion, no al reves, porque asi el
+        oyente puede separar las partes en cuanto conoce la marca: lo de
+        antes es la palabra, lo de despues es lo que significa. Sin un
+        separador reconocible, dos cadenas pegadas no se pueden partir.
+        """
+        marca = self.voc[V_ACT].produce(SEDICE)
+        if marca is None:
+            marca = self.voc[V_ACT].invent(SEDICE)
+        return forma + marca + descripcion
+
+    def leer_ensenanza(self, s):
+        """(forma, descripcion) si esto es una enseñanza. None si no.
+
+        Se busca la marca de SEDICE dentro de la cadena; lo de antes es la
+        palabra de la que se habla y lo de despues, su glosa.
+        """
+        marca = self.voc[V_ACT].produce(SEDICE)
+        if not marca:
+            return None
+        i = s.find(marca, self.cfg.morph_min)
+        if i < self.cfg.morph_min:
+            return None
+        forma, desc = s[:i], s[i + len(marca):]
+        if len(forma) < self.cfg.morph_min or len(desc) < 2 * self.cfg.morph_min:
+            return None
+        return forma, desc
 
     # -- aprendizaje ----------------------------------------------------
     def observe(self, s, m, percept=None, speaker=None):

@@ -16,6 +16,7 @@ export const tribusPerdidas = ref([])
 export const gen = ref(0)
 export const conectado = ref(false)
 export const terminado = ref(null)
+export const oraciones = ref([])   // las ultimas frases glosadas
 export const tic = ref(0)          // fuerza redibujado sin reactividad profunda
 
 export const manejadores = {
@@ -33,6 +34,7 @@ export const manejadores = {
     tic.value++
   },
   episodio: e => { episodios.push(e); tic.value++ },
+  oracion: o => { oraciones.value = [o, ...oraciones.value].slice(0, 12) },
   corte: c => { cortes.value = [...cortes.value, c] },
   tribu_perdida: t => { tribusPerdidas.value = [...tribusPerdidas.value, t.tribu] },
   fin: f => { terminado.value = f },

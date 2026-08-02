@@ -63,6 +63,8 @@ class Agent:
         self.seen = {}         # cat -> veces experimentada de primera mano
         self.heard_of = set()  # cats cuyo valor viene SOLO de oidas
         self.origen = {}       # cat -> como se supo la PRIMERA vez
+        self.en_region = {}    # (cat, region) -> veces vista alli
+        self.por_region = {}   # region -> total visto alli
         #   ^ la procedencia se fija al aprender y no se reescribe. Si se
         #     mirara el estado actual, la experiencia directa borraria el
         #     rastro: casi todo acaba viviendose, y entonces parece que el
@@ -137,6 +139,30 @@ class Agent:
         """Deriva lenta. Ni quieto ni teletransportado."""
         self.pos = np.clip(
             self.pos + rng.noise(2, self.cfg.wander), 0.02, 0.98)
+
+    def anotar_region(self, cat, region):
+        """Llevar la cuenta de que aparece en cada sitio.
+
+        No es un mecanismo nuevo: es lo que cualquiera acumula andando por
+        ahi. Sirve para desambiguar despues — si aqui nunca sale el fruto
+        amargo, una palabra que cubre los dos frutos se lee «dulce».
+        """
+        if cat is None or region is None:
+            return
+        k = (cat, region)
+        self.en_region[k] = self.en_region.get(k, 0) + 1
+        self.por_region[region] = self.por_region.get(region, 0) + 1
+
+    def contexto_de(self, region):
+        """Plausibilidad de cada categoria en esta region, en [0, 1].
+
+        Devuelve None si aun no ha andado bastante por aqui: sin datos, el
+        contexto no debe opinar. Un prior inventado seria peor que ninguno.
+        """
+        total = self.por_region.get(region, 0)
+        if total < self.cfg.contexto_min:
+            return None
+        return lambda c: self.en_region.get((c, region), 0) / total
 
     def learn_place(self, place, cost):
         a = self.cfg.value_lr
@@ -229,6 +255,66 @@ class Agent:
                               min_n=self.cfg.describe_min_morphs,
                               refina=self.cfg.desc_refina)
         return "".join(piezas) if len(piezas) >= 2 else None
+
+    def ensenar_palabra(self, cat, ref):
+        """«mi palabra para esto es X, y esto es: verde, amargo».
+
+        Se hace cuando el otro NO te ha entendido: en vez de repetir o de
+        limitarte a describir, emparejas tu palabra con su descripcion.
+        Asi el oyente no solo entiende esta vez, se lleva la palabra.
+        """
+        from .attributes import describir
+        forma = self.gram.cat.produce(cat)
+        if forma is None or not (0 <= cat < self.concepts.n):
+            return None
+        piezas, _ = describir(self.gram, self.concepts.protos[cat], ref,
+                              min_n=self.cfg.describe_min_morphs,
+                              refina=self.cfg.desc_refina)
+        if len(piezas) < 2:
+            return None
+        return self.gram.ensenar(forma, "".join(piezas))
+
+    def aprender_ensenanza(self, cadena, ref, medio):
+        """Alguien me esta enseñando una palabra. ¿La entiendo y la adopto?
+
+        REGLA DE LA PIEZA QUE SOBRA, aplicada a la construccion entera.
+        Antes esto exigia conocer ya la marca de «se dice» para poder
+        separar la cadena — y como cada hablante inventaba la suya, el
+        100% se caia en ese primer eslabon sin llegar a intentar nada mas.
+
+        Es el mismo callejon que tuvo el complementante y se sale igual:
+        si reconozco lo de los extremos, lo de en medio TIENE que ser la
+        marca. Se prueban los cortes; si el principio es una palabra
+        plausible y el final se decodifica como descripcion, el trozo
+        central se adopta como marca.
+
+        Sigue sin entrar nada sin anclaje: hace falta decodificar la
+        glosa. Lo que se relaja no es la exigencia de entender, es la de
+        conocer de antemano el separador.
+        """
+        from .events import SEDICE
+        lo, hi = self.cfg.morph_min, self.cfg.morph_max
+        n = len(cadena)
+        conocida = self.gram.leer_ensenanza(cadena)
+        candidatos = [conocida] if conocida else []
+        if not candidatos:
+            # sin marca conocida: buscar el corte que deje una glosa legible
+            for i in range(lo, n - 2 * lo):
+                for j in range(i + lo, min(i + hi, n - 2 * lo) + 1):
+                    candidatos.append((cadena[:i], cadena[j:], cadena[i:j]))
+        for cand in candidatos:
+            if len(cand) == 2:
+                forma, desc, marca = cand[0], cand[1], None
+            else:
+                forma, desc, marca = cand
+            cat, _nuevo = self.understand_description(desc, ref, medio)
+            if cat is None:
+                continue
+            self.gram.cat.reward(forma, cat)
+            if marca is not None:
+                self.gram.voc[0].reward(marca, SEDICE)   # la pieza que sobraba
+            return True
+        return False
 
     def understand_description(self, cadena, ref, medio):
         """Leer una descripcion: hallar el concepto o INSTALARLO.
