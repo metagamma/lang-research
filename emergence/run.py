@@ -36,6 +36,29 @@ from .world import World, load_spec
 PROBE_SEED = 20260801        # bateria de medida fija: la misma para todo
 
 
+def aplicar_zipf(spec, exponente):
+    """Reparte la abundancia segun la ley de Zipf. Fase 15.
+
+    En el mundo real unas pocas cosas aparecen muchisimo y la mayoria casi
+    nunca; nuestros mundos reparten la abundancia de forma bastante plana.
+    La ley de Zipf es la forma canonica de esa asimetria: la n-esima cosa
+    mas frecuente aparece proporcionalmente a 1/n^s.
+
+    Se aplica sobre el ORDEN QUE YA TENIAN, no al azar: lo que era mas
+    abundante sigue siendolo, solo se exagera el desnivel. Asi el mundo no
+    cambia de estructura, solo de reparto — que es lo unico que queremos
+    manipular.
+
+    Los depredadores quedan fuera. Su frecuencia la fija
+    `alarms_per_agent`, no el muestreo de forrajeo, y tocarla aqui
+    mezclaria dos manipulaciones en una.
+    """
+    presas = [k for k in spec.kinds if k.affordance != "depredador"]
+    presas.sort(key=lambda k: -k.abundance)
+    for i, k in enumerate(presas, start=1):
+        k.abundance = round(1.0 / (i ** exponente), 5)
+
+
 def simulate(mode, seed, cfg, n_tribes, generations, metrics_every=5,
              verbose=False, recorder=None, on_generation=None):
     """Una corrida. Devuelve (registros_por_generacion, estado_final)."""
@@ -48,6 +71,8 @@ def simulate(mode, seed, cfg, n_tribes, generations, metrics_every=5,
 
     spec = load_spec(cfg.world)
     cfg.dim, cfg.n_places = spec.dim, spec.n_places
+    if cfg.zipf:
+        aplicar_zipf(spec, cfg.zipf)
     world = World(rng_world, spec)
     probes = world.probe_set(rng_probe, per_kind=10)
     channel = Channel(mode, cfg, rng_channel)

@@ -311,6 +311,18 @@ class Config:
     #     Criterio de fracaso: si al derivar la comprension cae, el cambio
     #     no compensa. Una lengua que cambia mas rapido de lo que se
     #     aprende deja de ser una lengua.
+    zipf: float = 0.0                # exponente de la ley de Zipf en abundancia
+    #   ^ FASE 15. En el mundo real unas pocas cosas aparecen muchisimo y la
+    #     mayoria casi nunca. Nuestros mundos reparten la abundancia de
+    #     forma bastante plana.
+    #
+    #     Hay un resultado publicado que contrastar (EMNLP 2025): la
+    #     composicionalidad emerge de la EXPOSICION LIMITADA, no de la
+    #     frecuencia. Con `zipf > 0` la cola de tipos raros se ve poco, y
+    #     la prediccion de ese paper es que la composicionalidad deberia
+    #     SUBIR —hay que generalizar a lo que no se ha visto— aunque la
+    #     coherencia de los tipos raros baje.
+
     travel_scale: float = 6.0        # de distancia a coste energetico
 
     # --- mundo --------------------------------------------------------
