@@ -41,8 +41,20 @@ from .lexicon import Lexicon
 from .phonology import coin
 
 # --- vocabularios: inventarios de morfos por tipo de valor -------------
-V_ACT, V_CAT, V_PLACE, V_TENSE = range(4)
-N_VOC = 4
+V_ACT, V_CAT, V_PLACE, V_TENSE, V_COMP = range(5)
+N_VOC = 5
+#   ^ V_COMP existe siempre pero solo se USA con `cfg.comp_aparte`. Fase 14.
+#
+#     El complementante —la marca de «dijo que…»— vivia en V_ACT con el
+#     existencial y con «comio». Pero `Lexicon.reward()` aplica inhibicion
+#     lateral entre las formas de un mismo valor Y entre los valores de una
+#     misma forma: todo lo que comparte vocabulario COMPITE.
+#
+#     Y el complementante no es un verbo. No describe un suceso: anuncia
+#     que viene una oracion entera. Que compartiera cajon con los verbos
+#     era una decision de implementacion, no de lingüistica — y es la
+#     sospecha de por que la Fase 12 duplico la convergencia de verbos
+#     mientras la comprension de citas bajaba.
 
 # --- ranuras del significado ------------------------------------------
 S_ACT, S_ARG1, S_ARG2, S_PLACE, S_TENSE = range(5)
@@ -158,7 +170,7 @@ class Syntax:
             # emerge; lo que si emerge es que exista el encaje y se use.
             if _d >= self.cfg.max_depth:
                 return (whole, HOLISTIC) if whole is not None else (None, None)
-            marca = self.voc[V_ACT].produce(DIJO)
+            marca = self.voc[self._v_comp()].produce(DIJO)
             dentro, _ = self.express(m[S_ARG1], order_i, _d + 1)
             if marca is None or dentro is None:
                 return (whole, HOLISTIC) if whole is not None else (None, None)
@@ -187,8 +199,9 @@ class Syntax:
     def invent(self, m):
         """Crear lo que falte. Reutiliza cada pieza que ya exista."""
         if self._is_quote(m):
-            if self.voc[V_ACT].produce(DIJO) is None:
-                self.voc[V_ACT].invent(DIJO)
+            vc = self._v_comp()
+            if self.voc[vc].produce(DIJO) is None:
+                self.voc[vc].invent(DIJO)
             self.invent(m[S_ARG1])
             s, mode = self.express(m)
             if mode:
@@ -218,6 +231,10 @@ class Syntax:
         return False
 
     # -- comprension ----------------------------------------------------
+    def _v_comp(self):
+        """Donde vive el complementante: aparte, o con los verbos."""
+        return V_COMP if self.cfg.comp_aparte else V_ACT
+
     def parse(self, s, _d=0, count=True, contexto=None):
         """(significado, modo). El significado puede tener huecos a None."""
         self._ctx = contexto            # lo consulta _scan al desambiguar
@@ -232,7 +249,7 @@ class Syntax:
         # oracion entera y hay que analizarla igual que cualquier otra:
         # la misma funcion llamandose a si misma. Eso es la recursividad.
         if _d < self.cfg.max_depth:
-            for (j, v, _w) in hits[V_ACT].get(0, ()):
+            for (j, v, _w) in hits[self._v_comp()].get(0, ()):
                 if v != DIJO or j >= len(s):
                     continue
                 dentro, modo = self.parse(s[j:], _d + 1, count)
@@ -378,7 +395,7 @@ class Syntax:
         agente ya hace.
         """
         if self._is_quote(m):
-            marca = self.voc[V_ACT].produce(DIJO)
+            marca = self.voc[self._v_comp()].produce(DIJO)
             dentro = self.glosar(m[S_ARG1])
             if marca is None or dentro is None:
                 return None
@@ -515,7 +532,7 @@ class Syntax:
             # basta con que coincida el nucleo: que pasa y a quien
             if (leido[S_ACT] == dentro[S_ACT]
                     and leido[S_ARG1] == dentro[S_ARG1]):
-                self.voc[V_ACT].reward(s[:cut], DIJO)
+                self.voc[self._v_comp()].reward(s[:cut], DIJO)
                 break
         self.hol.reward(s, m)
 

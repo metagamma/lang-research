@@ -281,6 +281,22 @@ class Config:
     #     nada accionable. Si el exito baja, no compensa.
 
     # --- Fases 13-15: contacto, deriva fonica, frecuencia -------------
+    comp_aparte: bool = False        # el complementante, en su propio vocabulario
+    #   ^ FASE 14. Hoy el existencial, «comio» y el complementante «dijo»
+    #     comparten el vocabulario V_ACT, y `reward()` aplica inhibicion
+    #     lateral entre las formas de un mismo valor Y entre los valores de
+    #     una misma forma. Reforzar unos castiga a los otros.
+    #
+    #     Sospecha, no medida todavia: por eso la Fase 12 duplico la
+    #     convergencia de verbos (0.181 -> 0.44) y la comprension de citas
+    #     BAJO (0.133 -> 0.076). El complementante no es un verbo mas —
+    #     no describe un suceso, marca que viene una oracion— y competir
+    #     con los verbos por el mismo cajon puede estar hundiendolo.
+    #
+    #     Prediccion: separandolo, la convergencia de DIJO sube y las
+    #     citas se entienden mas. Puede fallar: si el complementante
+    #     converge gracias a compartir estadistica con los verbos, sacarlo
+    #     lo empeorara.
     deriva_fonica: float = 0.0       # cambio de sonido por generacion
     #   ^ FASE 13. Las lenguas reales cambian de SONIDO, no solo de
     #     palabra: lenicion, asimilacion. Y lo hacen de forma SISTEMATICA
