@@ -1,0 +1,4 @@
+control   coh=0.487 topsim=0.328 exito=0.631 pob=16
+contacto  coh=0.473 topsim=0.321 exito=0.636 pob=16
+deriva    coh=0.451 topsim=0.153 exito=0.662 pob=16
+zipf      coh=0.396 topsim=0.332 exito=0.672 pob=16
