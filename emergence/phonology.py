@@ -29,3 +29,39 @@ def coin(rng, lo=1, hi=2):
     if rng.random() < 0.35:
         w += rng.choice(CODAS)
     return w
+
+
+# --- cambio fonico (Fase 13) ------------------------------------------
+#
+# Las lenguas reales no solo cambian de palabra: cambian de SONIDO, y de
+# forma sistematica. La lenicion —una oclusiva entre vocales se ablanda—
+# ocurre en latin > castellano (vita > vida), en celta, en japones. No es
+# que cada hablante deforme al azar: es que TODA la comunidad aplica la
+# misma regla, y por eso la lengua sigue siendo mutuamente inteligible
+# mientras deriva.
+#
+# Eso es lo que se modela aqui, y la distincion importa: un ruido por
+# hablante rompe la lengua; una regla compartida la desplaza entera.
+
+LENICION = {"p": "b", "t": "d", "k": "g", "b": "v", "d": "r", "g": "",
+            "s": "z", "f": "v"}
+
+
+def deriva(forma, rng, fuerza):
+    """Aplica cambio fonico a una forma. Devuelve la forma nueva.
+
+    Solo entre vocales, que es donde la lenicion ocurre de verdad: una
+    consonante en posicion fuerte (inicio de palabra) resiste. Y una sola
+    consonante por aplicacion, porque los cambios en cadena no ocurren de
+    golpe.
+    """
+    if len(forma) < 3 or rng.random() >= fuerza:
+        return forma
+    sitios = [i for i in range(1, len(forma) - 1)
+              if forma[i] in LENICION
+              and forma[i - 1] in NUCLEI and forma[i + 1] in NUCLEI]
+    if not sitios:
+        return forma
+    i = rng.choice(sitios)
+    nueva = forma[:i] + LENICION[forma[i]] + forma[i + 1:]
+    return nueva if len(nueva) >= 2 else forma

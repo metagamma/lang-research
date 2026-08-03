@@ -146,7 +146,45 @@ class Tribe:
         self.run_episodes(world, channel, rng, acc, gen)
         self.metabolism_and_death()
         births = self.reproduce(rng)
+        if self.cfg.deriva_fonica:
+            self.derivar(rng)
         return births
+
+    def derivar(self, rng):
+        """Cambio fonico sistematico. Fase 13.
+
+        LA REGLA ES DE LA TRIBU, NO DEL HABLANTE, y ahi esta todo. Si cada
+        agente deformara sus formas por su cuenta, la lengua se
+        desintegraria: nadie entenderia a nadie y lo que mediriamos seria
+        ruido. Las lenguas reales derivan porque TODA la comunidad aplica
+        el mismo cambio a la vez —vita > vida en todo el latin vulgar—, y
+        por eso siguen siendo mutuamente inteligibles mientras cambian.
+
+        Asi que se sortea UNA forma de la tribu, se le aplica la lenicion,
+        y el resultado se propaga a todos los que la tenian. La lengua se
+        desplaza entera.
+        """
+        from .phonology import deriva
+        from .syntax import V_CAT
+        vivos = self.living()
+        if len(vivos) < 2:
+            return
+        formas = set()
+        for a in vivos:
+            for (f, _c) in a.gram.voc[V_CAT].w:
+                formas.add(f)
+        if not formas:
+            return
+        vieja = rng.choice(sorted(formas))
+        nueva = deriva(vieja, rng, self.cfg.deriva_fonica)
+        if nueva == vieja:
+            return
+        for a in vivos:
+            voc = a.gram.voc[V_CAT]
+            for (f, c), w in list(voc.w.items()):
+                if f == vieja:
+                    voc._drop(f, c)
+                    voc._set(nueva, c, w)
 
 
 class Accumulator:

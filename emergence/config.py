@@ -280,6 +280,21 @@ class Config:
     #     pero tambien gasta energia en conversaciones que no informan de
     #     nada accionable. Si el exito baja, no compensa.
 
+    # --- Fases 13-15: contacto, deriva fonica, frecuencia -------------
+    deriva_fonica: float = 0.0       # cambio de sonido por generacion
+    #   ^ FASE 13. Las lenguas reales cambian de SONIDO, no solo de
+    #     palabra: lenicion, asimilacion. Y lo hacen de forma SISTEMATICA
+    #     —toda la comunidad aplica la misma regla— que es justo lo que
+    #     permite derivar sin dejar de entenderse.
+    #
+    #     Motivacion medida: en el mundo de setas el cambio semantico se
+    #     hundio a 1/12 porque la lengua converge tanto que ya no hay
+    #     variacion de la que alimentarse. La deriva fonica es una fuente
+    #     de cambio INDEPENDIENTE del desacuerdo.
+    #
+    #     Criterio de fracaso: si al derivar la comprension cae, el cambio
+    #     no compensa. Una lengua que cambia mas rapido de lo que se
+    #     aprende deja de ser una lengua.
     travel_scale: float = 6.0        # de distancia a coste energetico
 
     # --- mundo --------------------------------------------------------
