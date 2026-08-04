@@ -30,6 +30,26 @@ class Config:
     lex_lr: float = 0.18             # refuerzo por co-observacion
     lex_inhib_form: float = 0.28     # competencia entre FORMAS de un significado
     #   ^ alta => convergencia a una sola palabra por concepto (mata sinonimia)
+    lex_collapse: float = 0.6        # inhibicion REFORZADA al confirmar una convencion
+    #   ^ COLAPSO GANADOR-SE-LO-LLEVA del juego de nombres (Baronchelli et
+    #     al.): cuando una co-observacion CONFIRMA un par que ya estaba
+    #     asentado (peso >= lex_confidence), aplasta a las formas rivales con
+    #     esta fuerza en vez de con lex_inhib_form. Es la condensacion que
+    #     rompe el empate 3-3 por realimentacion. Va condicionado al EXITO, no
+    #     a cada oida, PORQUE subir lex_inhib_form a lo bruto ya se midio y
+    #     BAJA la coherencia (0.34): mata variantes en la exploracion antes de
+    #     que cuaje ninguna. Aqui solo colapsa lo que ya gano. 0 = apagado
+    #     (usa lex_inhib_form siempre, el modelo previo).
+    #
+    #     ENCENDIDO a 0.60 por MEDICION. Con `collapse` a 12 semillas el
+    #     colapso moderado ROMPE el atractor 0.45: coherencia 0.447 -> 0.501
+    #     (+0.054, IC95[+0.011,+0.097], delta +0.53, SI) y de paso topsim
+    #     +0.049 (IC95[+0.001,+0.099], delta +0.43, SI) — sin canje: aciertos
+    #     +0.001 y composicion plana. A 0.85 (colapso duro) el efecto baja:
+    #     demasiada inhibicion vuelve a rozar la exploracion, asi que el
+    #     optimo es MODERADO, justo como predice la teoria del juego de
+    #     nombres. Es el primer mando que mueve el techo de coherencia hacia
+    #     arriba sin coste. 0 = apagado (modelo previo exacto).
     lex_inhib_meaning: float = 0.04  # competencia entre SIGNIFICADOS de una forma
     #   ^ baja a proposito => la polisemia esta PERMITIDA, no forzada
     social_exp: float = 0.4          # cuanto pesa CUANTA GENTE usa una forma
@@ -50,6 +70,26 @@ class Config:
     #     veces — convierte una ventaja 3-2 en una señal detectable, y la
     #     realimentacion hace el resto. Es como se difunden las variantes
     #     de verdad: por numero de hablantes, no por frecuencia bruta.
+    focal_bias: float = 0.0          # margen de casi-empate en que gana el PUNTO FOCAL
+    #   ^ APAGADO por defecto, y por MEDICION. La hipotesis: el atractor 0.45
+    #     es un fallo de ruptura de simetria (el empate entre formas se rompe
+    #     al azar y por cabeza; ocho monedas independientes nunca convergen y
+    #     un 3-3 no se deshace, ver la nota de social_exp arriba). El arreglo
+    #     propuesto: entre las formas dentro del b% del lider gana un criterio
+    #     COMPARTIDO — la mas corta, y a igual longitud la primera por orden —
+    #     que todos computan igual, un punto de Schelling que rompe el empate
+    #     del mismo lado en toda la banda (la brevedad es la ley de Zipf).
+    #
+    #     No se gana su sitio. Medido con `focal` (8 semillas): la coherencia
+    #     NO sube (b=0.15: +0.009, IC95 con 0) y los aciertos bajan un poco
+    #     (-0.018, SI). Aislado apagando social_exp (6 semillas), es PEOR:
+    #     coher 0.453 -> 0.412. La causa, medida: «la forma mas corta» es un
+    #     sesgo ORTOGONAL a la mayoria — no rastrea que usa la banda, asi que
+    #     solo empuja hacia una propiedad arbitraria (la longitud) y pelea
+    #     contra el consenso emergente. El desempate nunca fue el cuello: lo
+    #     que falta es una señal de mayoria GLOBAL, y esa es justo social_exp
+    #     (difusion por hablantes distintos), ya en su optimo. El mecanismo se
+    #     queda documentado y ablacionable; a 0 es el modelo previo exacto.
     lex_prune: float = 0.05          # peso por debajo del cual se olvida
     lex_confidence: float = 0.55     # peso minimo para fiarse de lo que oyes
     pragmatica: float = 0.0          # cuanto pesa el contexto al desambiguar
@@ -170,6 +210,104 @@ class Config:
     predator_death_p_fled: float = 0.02
     predator_damage: float = 5.0     # si no huye y sobrevive
 
+    # --- regimen cooperativo (premio en ENERGIA, no en lexico) --------
+    #   ^ RELAJACION DELIBERADA DE LA REGLA 2, y conviene decir exactamente
+    #     que se relaja y que NO. La Regla 2 del proyecto es que el LEXICO
+    #     (que forma va con que categoria) jamas se refuerza con el pago:
+    #     solo por co-observacion. Eso sigue intacto — estos premios NO
+    #     tocan ningun peso de `lexicon.py`. Lo que hacen es dar o quitar
+    #     ENERGIA, que es fitness: alimenta la reproduccion y por tanto la
+    #     seleccion de la vigilancia. El lenguaje pasa a comprar
+    #     supervivencia tambien por entenderse bien, no solo por permitir
+    #     decidir sin percibir.
+    #
+    #     Consecuencia que hay que asumir: con esto encendido, el brazo
+    #     `language` de la ablacion cobra una ventaja energetica directa que
+    #     `mute`/`noise` no pueden replicar, asi que la ablacion dejaria de
+    #     ser limpia. Por eso `run.ablation` los fuerza a 0 y corre en modo
+    #     PURO.
+    #
+    #     ENCENDIDO por defecto — pero por una razon SUTIL y medida. Solo,
+    #     este regimen es inerte: premiar en energia el entenderse no supera
+    #     al control puro (`cooperate`/`dynamic`, todos los IC95 con 0). Lo
+    #     que NO es inerte es su INTERACCION con el colapso lexico
+    #     (`lex_collapse`): son SINERGICOS. Medido con comparacion pareada
+    #     (10 semillas, solo cambia este interruptor), el colapso rompe el
+    #     atractor 0.45 SOLO con el regimen encendido —
+    #       regimen ON : coherencia +0.066 (SI), topsim +0.060 (SI)
+    #       regimen OFF: coherencia +0.019 (no), topsim -0.034 (no)
+    #     El premio construye convenciones compartidas por via demografica
+    #     (quien se entiende se reproduce); el colapso las condensa una vez
+    #     asentadas. Ninguno mueve el techo solo; juntos si. Por eso va ON:
+    #     es la mitad de la palanca de la emergencia, no un adorno.
+    #
+    #     CALIBRACION: estos cinco numeros deben quedar por debajo de
+    #     `metabolic_cost` (11.0) sumados sobre una generacion, y menores
+    #     que los pagos del mundo (±4..22). Si no, la economia se trivializa
+    #     y todos viven al tope. Son puntos de arranque, no verdades.
+    cooperative: bool = True         # INTERRUPTOR MAESTRO del regimen de premio
+    #   ^ True = se aplican los premios de abajo, modulados por el lazo de
+    #     `regime.py` (el modelo por defecto: la mitad de la combinacion
+    #     ganadora con `lex_collapse`). False = todo el regimen y el dinamismo
+    #     quedan inertes, para ablacionarlo limpio: `run._pure` y la ablacion
+    #     lo apagan, y los experimentos `cooperate`/`dynamic` lo encienden
+    #     explicitamente. Los valores de abajo son la BASE cuando esta ON.
+    comm_reward: float = 0.15        # entenderse Y acertar: premio a AMBOS
+    #   ^ solo si la comprension fue CORRECTA y llevo a una buena decision.
+    #     Nunca por emitir señal: el brazo `noise` no genera comprension
+    #     correcta, asi que no cobra. Es «cuando se entienden, eso es bueno».
+    comm_penalty: float = 0.20       # hablar de algo importante y NO ser entendido
+    #   ^ al hablante, ademas de la penalizacion lexica que ya existia en
+    #     `_uptake_feedback`. Castiga la comunicacion fallida, no el silencio.
+    compression_reward: float = 0.10  # producir por COMPOSICION, no bloque opaco
+    #   ^ una señal compuesta reutiliza morfos (buena compresion); una
+    #     holistica memoriza la combinacion entera. Premia armar buenas
+    #     oraciones con piezas.
+    teach_reward: float = 1.0        # enseñar instalando un CONCEPTO nuevo
+    #   ^ el premio mas alto porque es lo mas raro y lo mas valioso: la
+    #     unica via del modelo que entrega un concepto (no solo un valor) al
+    #     que no lo tenia. Es la palanca de la transmision cultural, que el
+    #     proyecto hallo construida pero infrautilizada.
+    testimony_reward: float = 0.5    # dar por relato un dato del mundo no vivido
+    #   ^ cooperar para sobrevivir avisando de lo que el otro no ha visto.
+
+    # --- dinamismo del premio (lazo cerrado, ver regime.py) -----------
+    #   ^ los premios de arriba son la BASE; el dinamismo los modula sin
+    #     tocar ningun peso lexico (sigue siendo canal de energia). Cada
+    #     parametro a 0 apaga su capa, y `run._pure` los apaga todos para
+    #     la ablacion. La idea: que el sistema se ajuste SOLO a premiar la
+    #     comprension y la emergencia del lenguaje, en vez de constantes.
+    dyn_control: float = 0.6         # ganancia η del controlador de kappa
+    #   ^ 0 = kappa fija en 1.0 (premio estatico). >0 = lazo cerrado: cada
+    #     generacion kappa se mueve hacia un setpoint aspiracional que
+    #     persigue la mejor comprension vista. Si oscila, bajarlo.
+    dyn_kappa_min: float = 0.25      # suelo de la ganancia global
+    dyn_kappa_max: float = 4.0       # techo de la ganancia global
+    #   ^ clamp del lazo: sin el, un error sostenido dispararia kappa.
+    dyn_aspiration: float = 1.08     # cuanto por encima del mejor valor se apunta
+    #   ^ la diana va un 8% por encima de la frontera vista: siempre queda
+    #     algo por mejorar, asi la presion no se apaga al converger. Muy
+    #     alto vuelve el premio insaciable; a 1.0 apunta justo a la frontera.
+    info_reward: float = 0.7         # peso de la ponderacion por INFORMACION
+    #   ^ Capa 1. 0 = premio de comprension plano. 1 = todo el premio depende
+    #     de lo decisivo que fue el mensaje (lo que habia EN JUEGO en la
+    #     decision: |payoff - coste de viaje|). 0.7 deja un piso: entenderse
+    #     siempre paga algo, pero avisar de algo que de verdad cambia la
+    #     decision paga mucho mas.
+    info_scale: float = 10.0         # a partir de que apuesta la info vale 1.0
+    #   ^ |payoff - viaje| por encima de esto se considera maxima informacion.
+    #     Escala lo que hay en juego a [0,1]. Puro numero de calibracion.
+    dyn_select: float = 1.0          # fuerza de la seleccion competitiva
+    #   ^ Capa 3. 0 = reproduccion en el orden actual. >0 = los mejores
+    #     comunicadores (comm_score) se reproducen primero cuando las plazas
+    #     escasean. Es lo que hace que el premio MUERDA con la banda llena:
+    #     seleccion frecuencia-dependiente, no energia absoluta. Sigue siendo
+    #     fitness (no lexico).
+    dyn_curriculum: float = 0.5      # cuanto pesa la madurez de la lengua
+    #   ^ Capa 4. 0 = se premia todo por igual siempre. >0 = con lengua
+    #     inmadura pesa entenderse a secas; segun madura, suben compresion y
+    #     enseñanza (comprimir solo tiene sentido cuando ya hay piezas).
+
     # --- decision -----------------------------------------------------
     p_explore: float = 0.45          # acercarse a lo desconocido (sin info)
     p_explore_against: float = 0.05  # acercarse pese a esperar algo malo
@@ -251,7 +389,13 @@ class Config:
     #     cultural no tenia nicho. Con vecindad, el saber se reparte por
     #     geografia. Prediccion: bajara la coherencia global (los juegos de
     #     nombres sobre retículas forman dominios) y apareceran dialectos.
-    p_nombrar_suceso: float = 0.0    # co-observacion de SUCESOS, no solo de cosas
+    p_nombrar_suceso: float = 0.4    # co-observacion de SUCESOS, no solo de cosas
+    #   ^ ENCENDIDO por defecto en el regimen cooperativo (antes 0.0). Es la
+    #     palanca documentada que mete los VERBOS en el circuito de
+    #     co-observacion que ya alinea los nombres: sin ella los morfos de
+    #     accion solo se refuerzan por el alineamiento interno y convergen
+    #     mucho peor que los nombres. Con un mundo mas rico en acciones,
+    #     alinear verbos es lo que da la clase «verbo» de verdad.
     #   ^ FASE 12. La asimetria que pone techo a la sintaxis compleja.
     #
     #     Medido: los nombres convergen a 0.488 y los verbos a 0.188
@@ -326,7 +470,11 @@ class Config:
     travel_scale: float = 6.0        # de distancia a coste energetico
 
     # --- mundo --------------------------------------------------------
-    world: str = "uqbar"             # fichero en worlds/ (o ruta a un json)
+    world: str = "uqbar_rico"        # fichero en worlds/ (o ruta a un json)
+    #   ^ POR DEFECTO el mundo enriquecido: mas familias (mas sustantivos) y
+    #     familias graduadas (mas adjetivos). Invalida la comparacion directa
+    #     con las tablas historicas de `uqbar`, que sigue disponible con
+    #     `--world uqbar`.
     contact: int = 0                 # encuentros entre tribus por generacion
     # Los dos siguientes los fija el cargador del mundo al arrancar; no se
     # tocan a mano. Estan aqui para que queden volcados con el resto de

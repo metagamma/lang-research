@@ -47,6 +47,7 @@ Tres modos de canal, como siempre:
 
 from .events import BEFORE, COMIO, DAÑO, DIJO, HAY, MATO, NOW
 from .phonology import coin
+from .syntax import COMPOSED
 
 MODE_LANGUAGE = "language"
 MODE_MUTE = "mute"
@@ -128,6 +129,19 @@ def _nombrar_suceso(a, b, act, cfg):
     oyente.gram.voc[V_ACT].reward(forma, act, speaker=hablante.id)
     hablante.gram.voc[V_ACT].reward(forma, act)
     return True
+
+
+def _regime(channel, cfg):
+    """El regimen dinamico de esta corrida, o uno estatico de respaldo.
+
+    Se cuelga de `channel.regime` en `simulate`; el respaldo cubre cualquier
+    ruta que construya un Channel sin regimen (compatibilidad).
+    """
+    reg = getattr(channel, "regime", None)
+    if reg is None:
+        from .regime import Regime
+        reg = channel.regime = Regime(cfg)
+    return reg
 
 
 def _kin_payback(speaker, listener_delta, listener_died, cfg):
@@ -220,6 +234,13 @@ def forage_episode(world, speaker, listener, channel, cfg, rng, gen, acc):
         rec["novel"] = not speaker.gram.knows_whole(msg)
     form, how = channel.transmit(speaker, msg) if msg else (None, None)
     rec["_meaning"] = msg          # para poder glosar la oracion
+    reg = _regime(channel, cfg)
+    # COMPRESION (regimen cooperativo): armar la señal por composicion,
+    # reutilizando morfos, en vez de memorizar la combinacion entera como
+    # bloque opaco. Premio de energia (dinamico via kappa/madurez), no lexico.
+    if channel.mode == MODE_LANGUAGE and how == COMPOSED:
+        speaker.gain(reg.compression())
+        rec["comp_reward"] = True
 
     # Si no se fia de su palabra, DESCRIBE en vez de nombrar. Es lo que
     # cierra el bucle: sin emitirlas en episodios reales, las piezas
@@ -313,6 +334,28 @@ def forage_episode(world, speaker, listener, channel, cfg, rng, gen, acc):
     rec["optimal"] = optimal
     rec["chose_well"] = (approach == optimal)
 
+    # COMPRENSION MUTUA (regimen cooperativo). «Cuando se entienden, eso es
+    # bueno»: si el oyente entendio (por nombre o por descripcion) y ademas
+    # acerto, se premia a AMBOS. El premio es por comprension CORRECTA que
+    # lleva a buena decision — nunca por emitir señal, asi que el brazo
+    # `noise` no puede cobrarlo. Si se hablo de algo, el oyente no lo
+    # entendio y ademas fallo, se castiga al hablante. Todo en energia.
+    if channel.mode == MODE_LANGUAGE:
+        if cat_heard is not None and rec["chose_well"]:
+            # INFORMACION (Capa 1): el premio escala con lo que habia EN
+            # JUEGO en la decision. Avisar de un veneno o de un buen forraje
+            # lejano paga; confirmar una piedra inerte, casi nada.
+            info = min(1.0, abs(thing.payoff - thing.travel) / cfg.info_scale)
+            r = reg.comm(info)
+            speaker.gain(r)
+            listener.gain(r)
+            speaker.comm_score += info
+            listener.comm_score += info
+            rec["comm_reward"] = True
+        elif form and cat_heard is None and not rec["chose_well"]:
+            speaker.gain(-reg.penalty())
+            rec["comm_penalty"] = True
+
     py = listener.perceive(thing)
     cat_l = listener.concepts.categorize(py)
     speaker.anotar_region(cat_s, region)
@@ -357,6 +400,20 @@ def forage_episode(world, speaker, listener, channel, cfg, rng, gen, acc):
                                  px, speaker.id)
             acc.ground("presente")
 
+    # COOPERACION (regimen cooperativo). Dar por el lenguaje un dato clave
+    # para sobrevivir se premia en energia al hablante:
+    #   - instalar un CONCEPTO en quien no lo tenia (la unica via del modelo
+    #     que entrega concepto, no solo valor): premio mayor.
+    #   - un relato que enseña algo del mundo que el oyente no vivio.
+    if channel.mode == MODE_LANGUAGE:
+        if rec.get("concepto_nuevo") or rec.get("aprendida"):
+            speaker.gain(reg.teach())
+            speaker.comm_score += 1.0
+            rec["teach_reward"] = True
+        if rec.get("testimony"):
+            speaker.gain(reg.testimony())
+            rec["testimony_reward"] = True
+
     return rec
 
 
@@ -387,10 +444,14 @@ def alarm_episode(world, speaker, listener, channel, cfg, rng, gen, acc):
     px = speaker.perceive(thing)
     cat_s = speaker.concepts.categorize(px)
     msg = (MATO, cat_s, None, thing.place, NOW)
+    reg = _regime(channel, cfg)
     if speaker.wants_to_speak(cat_s):
         rec["novel"] = not speaker.gram.knows_whole(msg)
         form, how = channel.transmit(speaker, msg)
         rec["_meaning"] = msg
+        if channel.mode == MODE_LANGUAGE and how == COMPOSED:
+            speaker.gain(reg.compression())
+            rec["comp_reward"] = True
     else:
         form, how = None, None
     rec["signal"], rec["said"] = form, how
@@ -410,6 +471,24 @@ def alarm_episode(world, speaker, listener, channel, cfg, rng, gen, acc):
     fled = listener.decide_flee(cat_heard)
     rec["acted"] = fled
     rec["chose_well"] = fled
+
+    # COMPRENSION MUTUA en la alarma: entender el aviso y huir es acierto
+    # (huir siempre es lo optimo aqui). Premio a ambos; castigo al hablante
+    # si aviso y el oyente no lo entendio ni huyo.
+    if channel.mode == MODE_LANGUAGE:
+        if cat_heard is not None and fled:
+            # una alarma bien entendida siempre esta en juego la vida: la
+            # informacion es maxima (evitar al depredador).
+            info = min(1.0, cfg.predator_damage / cfg.info_scale)
+            r = reg.comm(info)
+            speaker.gain(r)
+            listener.gain(r)
+            speaker.comm_score += info
+            listener.comm_score += info
+            rec["comm_reward"] = True
+        elif form and cat_heard is None and not fled:
+            speaker.gain(-reg.penalty())
+            rec["comm_penalty"] = True
 
     py = listener.perceive(thing)
     cat_l = listener.concepts.categorize(py)

@@ -132,7 +132,15 @@ class Tribe:
     def reproduce(self, rng):
         cfg = self.cfg
         newborns = []
-        for a in self.agents:
+        # SELECCION COMPETITIVA (Capa 3). Con la banda llena las plazas son
+        # escasas: quien se reproduce lo decide la competencia comunicativa,
+        # no el orden de la lista. Los mejores comunicadores primero. Es
+        # seleccion de fitness (no toca el lexico), pero relativa — lo que
+        # hace que el premio muerda aunque todos esten al tope de energia.
+        cand = self.agents
+        if cfg.cooperative and cfg.dyn_select:
+            cand = sorted(self.agents, key=lambda a: -a.comm_score)
+        for a in cand:
             if len(self.agents) + len(newborns) >= cfg.max_pop:
                 break
             if a.energy >= cfg.repro_threshold:
@@ -217,6 +225,12 @@ class Accumulator:
         self.novel = 0              # combinaciones nunca dichas antes
         self.novel_good = 0
         self.known_good = 0
+        # regimen cooperativo: episodios que dispararon cada premio/castigo
+        self.coop_comm = 0          # comprension mutua + acierto (a ambos)
+        self.coop_comp = 0          # compresion (señal compuesta)
+        self.coop_penalty = 0       # comunicacion fallida (castigo al hablante)
+        self.coop_teach = 0         # se instalo un concepto en el oyente
+        self.coop_testimony = 0     # un relato enseño algo del mundo no vivido
 
     def ground(self, how):
         self.anchor[how] += 1
@@ -255,6 +269,16 @@ class Accumulator:
                 self.known_good += 1 if rec["chose_well"] else 0
         if rec["understood"]:
             self.understood += 1
+        if rec.get("comm_reward"):
+            self.coop_comm += 1
+        if rec.get("comp_reward"):
+            self.coop_comp += 1
+        if rec.get("comm_penalty"):
+            self.coop_penalty += 1
+        if rec.get("teach_reward"):
+            self.coop_teach += 1
+        if rec.get("testimony_reward"):
+            self.coop_testimony += 1
         if rec["chose_well"]:
             self.good += 1
         if rec["type"] == "forage":
@@ -294,6 +318,12 @@ class Accumulator:
             "anchor_shared": self.anchor.get("recuerdo compartido", 0) / max(1, self.past),
             "novel_success": self.novel_good / max(1, self.novel),
             "known_success": self.known_good / known,
+            # regimen cooperativo (fraccion de episodios)
+            "coop_comm_rate": self.coop_comm / e,
+            "coop_comp_rate": self.coop_comp / e,
+            "coop_penalty_rate": self.coop_penalty / e,
+            "coop_teach_rate": self.coop_teach / e,
+            "coop_testimony_rate": self.coop_testimony / e,
         }
 
 
@@ -329,6 +359,25 @@ class Population:
         for t in self.tribes:
             births += t.step(world, channel, rng, acc, gen)
         self.contact_round(world, channel, rng, acc, gen)
+        # CONTROLADOR (Capa 2). Cerrado el episodio se calcula el INDICE
+        # COMPUESTO DE EMERGENCIA de esta generacion y se ajusta kappa para
+        # la siguiente: la presion persigue la mejor frontera vista del
+        # conjunto, no de una sola metrica.
+        #
+        # Las tres cosas que definen que hay lengua, con proxies BARATOS que
+        # el acumulador ya lleva (el controlador corre cada generacion; la
+        # coherencia y el topsim reales son caros y solo se miden cada pocas):
+        #   comprension    entenderse y acertar   (coop_comm / episodios)
+        #   coherencia     compartir convenciones (understood / señales)
+        #   composicion    armar por partes       (parsed 'comp' / señales)
+        reg = getattr(channel, "regime", None)
+        if reg is not None and self.cfg.cooperative:
+            e = max(1, acc.episodes)
+            sig = max(1, acc.signals)
+            comprension = acc.coop_comm / e
+            coherencia = acc.understood / sig
+            composicion = acc.parsed.get("comp", 0) / sig
+            reg.update((comprension + coherencia + composicion) / 3.0)
         return acc, births
 
     # -- resumenes -----------------------------------------------------

@@ -66,11 +66,30 @@ class Lexicon:
         if not forms:
             return None
         e = self.cfg.social_exp
-        best, bs = None, -1.0
+        scored = []
         for f in forms:
             v = self.w[(f, cat)]
             if e:
                 v *= (1 + len(self.heard_from.get(f, ()))) ** e
+            scored.append((v, f))
+        b = self.cfg.focal_bias
+        if b:
+            # PUNTO FOCAL. El desempate por moneda de abajo es justo lo que
+            # deja el atractor 0.45: ocho agentes lanzando ocho monedas
+            # independientes nunca convergen, y un empate 3-3 no se rompe
+            # nunca. Aqui, entre las formas casi empatadas (dentro del margen
+            # focal del lider) gana la mas CORTA — y a igual longitud la
+            # primera por orden —, un criterio que TODOS computan igual. Asi
+            # el empate se rompe del mismo lado en toda la banda sin que nadie
+            # vea la mayoria global: es el punto de Schelling del juego de
+            # nombres, y el sesgo a la brevedad es la ley de Zipf, no un
+            # capricho. Actua solo sobre casi-empates, asi que no pisa una
+            # convencion que ya gana de sobra.
+            top = max(v for v, _ in scored)
+            near = [f for v, f in scored if v >= top * (1.0 - b)]
+            return min(near, key=lambda f: (len(f), f))
+        best, bs = None, -1.0
+        for v, f in scored:
             if v > bs or (v == bs and self.rng.random() < 0.5):
                 best, bs = f, v
         return best
@@ -165,6 +184,11 @@ class Lexicon:
         if speaker is not None:
             self.heard_from[form].add(speaker)
         cur = self.w.get((form, cat))
+        # ¿Estaba ya asentada esta convencion antes de este refuerzo? Si el
+        # par ya superaba la confianza, esta co-observacion no es aprender
+        # sino CONFIRMAR: los dos ya compartian la forma y acaban de acertar
+        # con ella. Es el «exito comunicativo» del juego de nombres.
+        established = cur is not None and cur >= self.cfg.lex_confidence
         if cur is None:
             self._set(form, cat, self.cfg.lex_init_w)
             cur = self.cfg.lex_init_w
@@ -174,9 +198,22 @@ class Lexicon:
         # El `tuple(...)` hace falta porque _scale puede borrar entradas y
         # mutar el conjunto que estamos recorriendo; pero si no hay rival
         # no copiamos nada, que es el caso mayoritario.
+        #
+        # COLAPSO GANADOR-SE-LO-LLEVA (naming game). Cuando la convencion ya
+        # estaba asentada, aplasta a las rivales con `lex_collapse` en vez de
+        # la inhibicion suave. Es lo que condensa el consenso y rompe el
+        # empate 3-3 por realimentacion: una vez que una forma va en cabeza y
+        # acierta, sus sinonimos se desploman. Va condicionado al EXITO — no
+        # a cada co-observacion — a proposito: subir `lex_inhib_form` a lo
+        # bruto ya se midio y BAJA la coherencia (0.34), porque mata las
+        # variantes en la fase exploratoria antes de que cuaje ninguna. Aqui
+        # solo colapsa lo que ya gano, asi que no toca la exploracion.
         rivales = self.by_cat.get(cat)
         if rivales and len(rivales) > 1:
-            factor = 1.0 - self.cfg.lex_inhib_form
+            inhib = self.cfg.lex_inhib_form
+            if established and self.cfg.lex_collapse:
+                inhib = self.cfg.lex_collapse
+            factor = 1.0 - inhib
             for f in tuple(rivales):
                 if f != form:
                     self._scale(f, cat, factor)
