@@ -687,6 +687,73 @@ def focal_experiment(cfg, n_tribes, generations, seeds, levels):
     print("  ACIERTOS no bajan: romper la simetria sin coste de precision.")
 
 
+def collapse_experiment(cfg, n_tribes, generations, seeds, levels):
+    """¿Rompe el COLAPSO GANADOR-SE-LO-LLEVA el atractor 0.45?
+
+    Teoria del juego de nombres (Baronchelli et al.): una comunidad alcanza
+    consenso pleno cuando, al comunicarse con exito, los hablantes NO solo
+    debilitan las formas rivales sino que las condensan hacia cero. Este
+    modelo usa inhibicion lateral suave y permite empates persistentes; el
+    atractor 0.45 es justo eso. `lex_collapse` aplica esa inhibicion
+    reforzada, pero SOLO al confirmar una convencion ya asentada (peso >=
+    confianza), no en cada oida — porque subir la inhibicion a lo bruto ya
+    se midio y baja la coherencia (0.34) al matar variantes en exploracion.
+
+    Mide si el colapso condicionado al exito SUBE la coherencia sin cobrar
+    en aciertos ni en composicionalidad (el modelo tolera sinonimia a
+    proposito, asi que el riesgo es un canje). Mismo mundo y semilla; solo
+    cambia `lex_collapse`.
+    """
+    print(f"COLAPSO  —  {seeds} semillas x {len(levels)} niveles x "
+          f"{generations} generaciones\n")
+    arms = {}
+    for k in levels:
+        rows = []
+        for seed in range(1, seeds + 1):
+            c = Config(**cfg.to_dict())
+            c.lex_collapse = k
+            recs, _ = simulate(MODE_LANGUAGE, seed, c, n_tribes,
+                               generations, metrics_every=5)
+            o = outcome(recs, generations)
+            tail = [r for r in recs if "coherence" in r][-3:]
+            rows.append({
+                "pop": o["pop"], "success": o["success"],
+                "coherence": mean([r["coherence"] for r in tail]),
+                "topsim": mean([r["topsim"] for r in tail]),
+                "composed": mean([r["lex_composed"] for r in tail]),
+                "synonymy": mean([r["lex_synonymy"] for r in tail]),
+            })
+        arms[k] = rows
+        print(f"  lex_collapse={k:.2f}  pob={mean([r['pop'] for r in rows]):5.1f}  "
+              f"exito={mean([r['success'] for r in rows]):.3f}  "
+              f"coher={mean([r['coherence'] for r in rows]):.3f}  "
+              f"topsim={mean([r['topsim'] for r in rows]):+.3f}  "
+              f"compuesto={mean([r['composed'] for r in rows]):.3f}  "
+              f"sinonimia={mean([r['synonymy'] for r in rows]):.2f}")
+
+    base = min(levels)
+    rng = random.Random(4243)
+    print("\n" + "=" * 72)
+    print(f"CONTRA lex_collapse={base:.2f} (inhibicion suave, modelo previo)")
+    print("=" * 72)
+    for key, label in [("coherence", "coherencia"), ("success", "aciertos"),
+                       ("topsim", "topsim"), ("composed", "composicionalidad")]:
+        print(f"\n  {label}")
+        for k in levels:
+            if k == base:
+                continue
+            xs = [r[key] for r in arms[k]]
+            ys = [r[key] for r in arms[base]]
+            obs, lo, hi = bootstrap_diff(xs, ys, rng, 4000)
+            sig = "SI" if (lo > 0 or hi < 0) else "no"
+            print(f"    k={k:.2f} - k={base:.2f} = {obs:+7.3f}  "
+                  f"IC95[{lo:+.3f}, {hi:+.3f}]  "
+                  f"delta={cliffs_delta(xs, ys):+.2f}  ¿distinto? {sig}")
+    print("\n  Gana si la COHERENCIA sube (IC95 sin 0) sin cobrar en aciertos")
+    print("  ni en composicionalidad. Si sube coherencia pero cae otra, es un")
+    print("  canje: se documenta y se deja lex_collapse=0 (como pragmatica).")
+
+
 def bottleneck_experiment(cfg, n_tribes, generations, seeds, capacities):
     """Fase 5: ¿aprieta el cuello de botella a favor de la composicion?
 
@@ -892,6 +959,14 @@ def main(argv=None):
     fo.add_argument("--levels", type=float, nargs="+", default=[0.0, 0.15, 0.30])
     _add_config_args(fo, cfg)
 
+    cl = sub.add_parser("collapse",
+                        help="¿rompe el colapso ganador-se-lo-lleva el atractor 0.45?")
+    cl.add_argument("--tribes", type=int, default=1)
+    cl.add_argument("--generations", type=int, default=80)
+    cl.add_argument("--seeds", type=int, default=8)
+    cl.add_argument("--levels", type=float, nargs="+", default=[0.0, 0.6, 0.85])
+    _add_config_args(cl, cfg)
+
     b = sub.add_parser("bottleneck",
                        help="Fase 5: ¿aprieta el cuello a favor de componer?")
     b.add_argument("--tribes", type=int, default=1)
@@ -1005,6 +1080,9 @@ def main(argv=None):
     elif args.cmd == "focal":
         focal_experiment(cfg, args.tribes, args.generations, args.seeds,
                          sorted(args.levels))
+    elif args.cmd == "collapse":
+        collapse_experiment(cfg, args.tribes, args.generations, args.seeds,
+                            sorted(args.levels))
     elif args.cmd == "cooperate":
         cooperate_experiment(cfg, args.tribes, args.generations, args.seeds,
                              sorted(args.levels))

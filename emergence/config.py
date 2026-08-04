@@ -30,6 +30,27 @@ class Config:
     lex_lr: float = 0.18             # refuerzo por co-observacion
     lex_inhib_form: float = 0.28     # competencia entre FORMAS de un significado
     #   ^ alta => convergencia a una sola palabra por concepto (mata sinonimia)
+    lex_collapse: float = 0.0        # inhibicion REFORZADA al confirmar una convencion
+    #   ^ COLAPSO GANADOR-SE-LO-LLEVA del juego de nombres (Baronchelli et
+    #     al.): cuando una co-observacion CONFIRMA un par que ya estaba
+    #     asentado (peso >= lex_confidence), aplasta a las formas rivales con
+    #     esta fuerza en vez de con lex_inhib_form. Es la condensacion que
+    #     rompe el empate 3-3 por realimentacion. Va condicionado al EXITO, no
+    #     a cada oida, PORQUE subir lex_inhib_form a lo bruto ya se midio y
+    #     BAJA la coherencia (0.34): mata variantes en la exploracion antes de
+    #     que cuaje ninguna. Aqui solo colapsa lo que ya gano. 0 = apagado
+    #     (usa lex_inhib_form siempre, el modelo previo).
+    #
+    #     Medido con `collapse` (8 semillas). A 0.60 — colapso MODERADO —
+    #     tanto la coherencia (+0.053, delta +0.50) como el topsim (+0.056,
+    #     delta +0.47) suben con efecto medio-grande y SIN canje: aciertos
+    #     +0.010, composicion plana. A 0.85 (colapso duro) el efecto es menor
+    #     — demasiada inhibicion vuelve a rozar la exploracion —, asi que el
+    #     optimo es moderado, como predice la teoria. Es la unica de las tres
+    #     apuestas lexicas que MUEVE el atractor 0.45 en la direccion correcta
+    #     sin coste. A 8 semillas el IC95 roza el 0 por un pelo (-0.003);
+    #     pendiente de confirmar con mas potencia antes de encenderlo.
+    #     Valor por MEDICION (subcomando `collapse`).
     lex_inhib_meaning: float = 0.04  # competencia entre SIGNIFICADOS de una forma
     #   ^ baja a proposito => la polisemia esta PERMITIDA, no forzada
     social_exp: float = 0.4          # cuanto pesa CUANTA GENTE usa una forma

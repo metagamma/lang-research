@@ -184,6 +184,11 @@ class Lexicon:
         if speaker is not None:
             self.heard_from[form].add(speaker)
         cur = self.w.get((form, cat))
+        # ¿Estaba ya asentada esta convencion antes de este refuerzo? Si el
+        # par ya superaba la confianza, esta co-observacion no es aprender
+        # sino CONFIRMAR: los dos ya compartian la forma y acaban de acertar
+        # con ella. Es el «exito comunicativo» del juego de nombres.
+        established = cur is not None and cur >= self.cfg.lex_confidence
         if cur is None:
             self._set(form, cat, self.cfg.lex_init_w)
             cur = self.cfg.lex_init_w
@@ -193,9 +198,22 @@ class Lexicon:
         # El `tuple(...)` hace falta porque _scale puede borrar entradas y
         # mutar el conjunto que estamos recorriendo; pero si no hay rival
         # no copiamos nada, que es el caso mayoritario.
+        #
+        # COLAPSO GANADOR-SE-LO-LLEVA (naming game). Cuando la convencion ya
+        # estaba asentada, aplasta a las rivales con `lex_collapse` en vez de
+        # la inhibicion suave. Es lo que condensa el consenso y rompe el
+        # empate 3-3 por realimentacion: una vez que una forma va en cabeza y
+        # acierta, sus sinonimos se desploman. Va condicionado al EXITO — no
+        # a cada co-observacion — a proposito: subir `lex_inhib_form` a lo
+        # bruto ya se midio y BAJA la coherencia (0.34), porque mata las
+        # variantes en la fase exploratoria antes de que cuaje ninguna. Aqui
+        # solo colapsa lo que ya gano, asi que no toca la exploracion.
         rivales = self.by_cat.get(cat)
         if rivales and len(rivales) > 1:
-            factor = 1.0 - self.cfg.lex_inhib_form
+            inhib = self.cfg.lex_inhib_form
+            if established and self.cfg.lex_collapse:
+                inhib = self.cfg.lex_collapse
+            factor = 1.0 - inhib
             for f in tuple(rivales):
                 if f != form:
                     self._scale(f, cat, factor)
