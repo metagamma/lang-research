@@ -153,6 +153,20 @@ def report(records, state, cfg, n_tribes):
     print(f"  sinonimia (formas por significado)     {last.get('lex_synonymy', 0):.2f}")
     print(f"  polisemia (significados por forma)     {last.get('lex_polysemy', 0):.2f}")
 
+    # --- regimen cooperativo (premio en energia, no en lexico) ---
+    coop_on = any(getattr(cfg, p) for p in COOP_PARAMS)
+    print("\n" + line)
+    print("REGIMEN COOPERATIVO  —  premio/castigo en ENERGIA "
+          + ("(ACTIVO)" if coop_on else "(APAGADO)"))
+    print(line)
+    print(f"  comprension mutua + acierto (a ambos)  {last.get('coop_comm_rate', 0):.3f}")
+    print(f"  compresion (señal compuesta)           {last.get('coop_comp_rate', 0):.3f}")
+    print(f"  castigo por comunicacion fallida       {last.get('coop_penalty_rate', 0):.3f}")
+    print(f"  enseñanza que instalo un concepto      {last.get('coop_teach_rate', 0):.3f}")
+    print(f"  testimonio util (dato no vivido)       {last.get('coop_testimony_rate', 0):.3f}")
+    print("    (fraccion de episodios; el premio es de energia = fitness,")
+    print("     nunca de pesos lexicos: la Regla 2 sigue en pie)")
+
     # --- como nombra cada tribu el mundo ---
     print("\n" + line)
     print("LENGUAS EMERGENTES  —  como nombra cada tribu lo que el mundo contiene")
@@ -207,18 +221,21 @@ def report(records, state, cfg, n_tribes):
 
     ejemplo = next((a for a in alive if a.gram.has_rules()), None)
     if ejemplo is not None:
+        from .events import HAY, NOW
+        from .syntax import V_PLACE
+        place_voc = ejemplo.gram.voc[V_PLACE]
         cats = sorted(ejemplo.gram.cat.by_cat)[:3]
-        places = sorted(ejemplo.gram.place.by_cat)[:3]
+        places = sorted(place_voc.by_cat)[:3]
         print(f"\n  gramatica del agente {ejemplo.id}:")
         print("    morfos de COSA:  " + ", ".join(
             f"cat{c}={ejemplo.gram.cat.produce(c)!r}" for c in cats))
         print("    morfos de LUGAR: " + ", ".join(
-            f"{world.place_names[p]}={ejemplo.gram.place.produce(p)!r}"
+            f"{world.place_names[p]}={place_voc.produce(p)!r}"
             for p in places if p < world.n_places))
         if cats and places:
             c, p = cats[0], places[0]
-            comp = ejemplo.gram.cat.produce(c) + ejemplo.gram.place.produce(p)
-            dice, modo = ejemplo.gram.express(c, p)
+            comp = (ejemplo.gram.cat.produce(c) or "") + (place_voc.produce(p) or "")
+            dice, modo = ejemplo.gram.express((HAY, c, None, p, NOW))
             print(f"    compondria {comp!r} para (cat{c}, {world.place_names[p]});"
                   f" de hecho dice {dice!r} ({modo})")
     else:
@@ -314,11 +331,32 @@ def outcome(records, generations):
     }
 
 
+COOP_PARAMS = ("comm_reward", "comm_penalty", "compression_reward",
+               "teach_reward", "testimony_reward")
+
+
+def _pure(cfg):
+    """Copia de la config con el regimen cooperativo APAGADO (Regla 2 pura).
+
+    El modelo por defecto premia en energia por entenderse, y eso da al
+    brazo `language` una ventaja energetica directa que `mute`/`noise` no
+    pueden replicar: haria circular la ablacion. Aqui se fuerzan a 0 para
+    que el experimento falsable siga midiendo lo que dice medir — que el
+    unico canal del lenguaje hacia la supervivencia es decidir sin percibir.
+    """
+    c = Config(**cfg.to_dict())
+    for p in COOP_PARAMS:
+        setattr(c, p, 0.0)
+    return c
+
+
 def ablation(cfg, n_tribes, generations, seeds, out=None):
+    cfg = _pure(cfg)
     arms = {m: [] for m in MODES}
     all_records = []
     print(f"ABLACION  —  {seeds} semillas x {len(MODES)} brazos x "
-          f"{generations} generaciones\n")
+          f"{generations} generaciones")
+    print("  (regimen cooperativo APAGADO: modo puro, Regla 2 intacta)\n")
     for seed in range(1, seeds + 1):
         row = []
         for mode in MODES:
@@ -361,6 +399,84 @@ def ablation(cfg, n_tribes, generations, seeds, out=None):
     print("\n  Nota: en 'mute' nadie paga speak_cost, asi que el brazo de")
     print("  control tiene una pequeña ventaja energetica. La comparacion")
     print("  es conservadora a proposito.")
+
+
+# ---------------------------------------------------------------------
+# Regimen cooperativo: ¿el premio por entenderse se gana su sitio?
+# ---------------------------------------------------------------------
+
+def cooperate_experiment(cfg, n_tribes, generations, seeds, levels):
+    """Mismo mundo, misma semilla; solo cambia la intensidad del premio.
+
+    Se escalan los cinco parametros cooperativos por un factor comun. El
+    nivel 0.0 es el CONTROL en modo puro (Regla 2 intacta): si premiar la
+    comunicacion no mejora nada sobre el, el mecanismo no se ha ganado el
+    sitio y hay que quitarlo — la misma vara con la que el proyecto juzga
+    la metafora, el cuello de botella o la pragmatica.
+
+    La hipotesis que pone a prueba, y que puede fallar: premiar en energia
+    entenderse y enseñar deberia subir la comprension, la compresion
+    (composicionalidad) y la transmision cultural (que hoy no emerge), sin
+    hundir los aciertos. Si los aciertos bajan o la coherencia cae —como
+    paso al romper la Regla 2 por la via lexica—, no compensa.
+    """
+    base = {p: getattr(cfg, p) for p in COOP_PARAMS}
+    print(f"REGIMEN COOPERATIVO  —  {seeds} semillas x {len(levels)} niveles x "
+          f"{generations} generaciones\n")
+    arms = {}
+    for lv in levels:
+        rows = []
+        for seed in range(1, seeds + 1):
+            c = Config(**cfg.to_dict())
+            for p in COOP_PARAMS:
+                setattr(c, p, base[p] * lv)
+            recs, state = simulate(MODE_LANGUAGE, seed, c, n_tribes,
+                                   generations, metrics_every=5)
+            o = outcome(recs, generations)
+            tail = [r for r in recs if "coherence" in r][-3:]
+            span = recs[-25:]
+            rows.append({
+                "pop": o["pop"], "success": o["success"],
+                "coherence": mean([r["coherence"] for r in tail]),
+                "topsim": mean([r["topsim"] for r in tail]),
+                "understood": mean([r["understood_rate"] for r in span]),
+                "teach": mean([r.get("coop_teach_rate", 0.0) for r in span]),
+                "testimony": mean([r["testimony_rate"] for r in span]),
+                "concepts": mean([r["concepts_installed"] for r in span]),
+            })
+        arms[lv] = rows
+        print(f"  nivel={lv:.2f}  pob={mean([r['pop'] for r in rows]):5.1f}  "
+              f"exito={mean([r['success'] for r in rows]):.3f}  "
+              f"coher={mean([r['coherence'] for r in rows]):.3f}  "
+              f"topsim={mean([r['topsim'] for r in rows]):+.3f}  "
+              f"comprension={mean([r['understood'] for r in rows]):.3f}  "
+              f"enseña={mean([r['teach'] for r in rows]):.3f}  "
+              f"testimonio={mean([r['testimony'] for r in rows]):.3f}")
+
+    base_lv = min(levels)
+    rng = random.Random(4245)
+    print("\n" + "=" * 72)
+    print(f"CONTRA nivel={base_lv:.2f} ({'modo puro' if base_lv == 0 else 'base'})")
+    print("=" * 72)
+    for key, label in [("success", "aciertos"), ("coherence", "coherencia"),
+                       ("topsim", "composicionalidad"),
+                       ("understood", "comprension"),
+                       ("testimony", "transmision cultural")]:
+        print(f"\n  {label}")
+        for lv in levels:
+            if lv == base_lv:
+                continue
+            xs = [r[key] for r in arms[lv]]
+            ys = [r[key] for r in arms[base_lv]]
+            obs, lo, hi = bootstrap_diff(xs, ys, rng, 4000)
+            sig = "SI" if (lo > 0 or hi < 0) else "no"
+            print(f"    nivel={lv:.2f} - {base_lv:.2f} = {obs:+7.3f}  "
+                  f"IC95[{lo:+.3f}, {hi:+.3f}]  "
+                  f"delta={cliffs_delta(xs, ys):+.2f}  ¿distinto? {sig}")
+
+    print("\n  El premio es de ENERGIA (fitness), nunca de pesos lexicos: la")
+    print("  Regla 2 sigue en pie. Lo que se mide es si esa presion selectiva")
+    print("  hacia entenderse mejora la lengua, o solo engorda a los agentes.")
 
 
 # ---------------------------------------------------------------------
@@ -603,7 +719,7 @@ def main(argv=None):
 
     p = sub.add_parser("sim", help="una corrida con informe legible")
     p.add_argument("--mode", choices=MODES, default=MODE_LANGUAGE)
-    p.add_argument("--tribes", type=int, default=2)
+    p.add_argument("--tribes", type=int, default=1)
     p.add_argument("--generations", type=int, default=80)
     p.add_argument("--seed", type=int, default=1)
     p.add_argument("--metrics-every", type=int, default=5)
@@ -612,7 +728,7 @@ def main(argv=None):
     _add_config_args(p, cfg)
 
     m = sub.add_parser("metaphor", help="Fase 4: ¿la metafora se gana su sitio?")
-    m.add_argument("--tribes", type=int, default=2)
+    m.add_argument("--tribes", type=int, default=1)
     m.add_argument("--generations", type=int, default=100)
     m.add_argument("--seeds", type=int, default=8)
     m.add_argument("--levels", type=float, nargs="+",
@@ -621,7 +737,7 @@ def main(argv=None):
 
     b = sub.add_parser("bottleneck",
                        help="Fase 5: ¿aprieta el cuello a favor de componer?")
-    b.add_argument("--tribes", type=int, default=2)
+    b.add_argument("--tribes", type=int, default=1)
     b.add_argument("--generations", type=int, default=120)
     b.add_argument("--seeds", type=int, default=8)
     b.add_argument("--capacities", type=int, nargs="+", default=[12, 25, 60, 0],
@@ -630,7 +746,7 @@ def main(argv=None):
 
     lv = sub.add_parser("live", help="correr indefinidamente y emitir en vivo")
     lv.add_argument("--port", type=int, default=8080)
-    lv.add_argument("--tribes", type=int, default=2)
+    lv.add_argument("--tribes", type=int, default=1)
     lv.add_argument("--seed", type=int, default=3)
     lv.add_argument("--eps", type=int, default=30,
                     help="episodios por segundo emitidos a la vista de mundo")
@@ -638,7 +754,7 @@ def main(argv=None):
     _add_config_args(lv, cfg)
 
     au = sub.add_parser("audit", help="la carta de la lengua, N semillas")
-    au.add_argument("--tribes", type=int, default=2)
+    au.add_argument("--tribes", type=int, default=1)
     au.add_argument("--generations", type=int, default=55)
     au.add_argument("--seeds", type=int, default=12)
     _add_config_args(au, cfg)
@@ -646,7 +762,7 @@ def main(argv=None):
     ex = sub.add_parser("export", help="volcar una corrida para el visor web")
     ex.add_argument("--out", default="client/public/data")
     ex.add_argument("--mode", choices=MODES, default=MODE_LANGUAGE)
-    ex.add_argument("--tribes", type=int, default=2)
+    ex.add_argument("--tribes", type=int, default=1)
     ex.add_argument("--generations", type=int, default=60)
     ex.add_argument("--seed", type=int, default=3)
     ex.add_argument("--every", type=int, default=1,
@@ -656,7 +772,7 @@ def main(argv=None):
 
     so = sub.add_parser("social",
                         help="¿rompe la amplificacion de mayorias el techo?")
-    so.add_argument("--tribes", type=int, default=2)
+    so.add_argument("--tribes", type=int, default=1)
     so.add_argument("--generations", type=int, default=50)
     so.add_argument("--seeds", type=int, default=10)
     so.add_argument("--levels", type=float, nargs="+", default=[0.0, 0.4, 0.8])
@@ -664,14 +780,23 @@ def main(argv=None):
 
     k = sub.add_parser("culture",
                        help="¿sobrevive un saber a quien lo adquirio?")
-    k.add_argument("--tribes", type=int, default=2)
+    k.add_argument("--tribes", type=int, default=1)
     k.add_argument("--generations", type=int, default=70)
     k.add_argument("--seeds", type=int, default=8)
     k.add_argument("--target", default=None, help="tipo latente objetivo")
     _add_config_args(k, cfg)
 
+    co = sub.add_parser("cooperate",
+                        help="¿el premio por entenderse se gana su sitio?")
+    co.add_argument("--tribes", type=int, default=1)
+    co.add_argument("--generations", type=int, default=80)
+    co.add_argument("--seeds", type=int, default=8)
+    co.add_argument("--levels", type=float, nargs="+", default=[0.0, 1.0, 2.0],
+                    help="multiplicador de los premios cooperativos (0 = puro)")
+    _add_config_args(co, cfg)
+
     a = sub.add_parser("ablation", help="el experimento")
-    a.add_argument("--tribes", type=int, default=2)
+    a.add_argument("--tribes", type=int, default=1)
     a.add_argument("--generations", type=int, default=80)
     a.add_argument("--seeds", type=int, default=10)
     a.add_argument("--out", default=None)
@@ -713,6 +838,9 @@ def main(argv=None):
     elif args.cmd == "metaphor":
         metaphor_experiment(cfg, args.tribes, args.generations, args.seeds,
                             sorted(args.levels))
+    elif args.cmd == "cooperate":
+        cooperate_experiment(cfg, args.tribes, args.generations, args.seeds,
+                             sorted(args.levels))
     else:
         ablation(cfg, args.tribes, args.generations, args.seeds, args.out)
     return 0

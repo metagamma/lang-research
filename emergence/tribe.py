@@ -217,6 +217,12 @@ class Accumulator:
         self.novel = 0              # combinaciones nunca dichas antes
         self.novel_good = 0
         self.known_good = 0
+        # regimen cooperativo: episodios que dispararon cada premio/castigo
+        self.coop_comm = 0          # comprension mutua + acierto (a ambos)
+        self.coop_comp = 0          # compresion (señal compuesta)
+        self.coop_penalty = 0       # comunicacion fallida (castigo al hablante)
+        self.coop_teach = 0         # se instalo un concepto en el oyente
+        self.coop_testimony = 0     # un relato enseño algo del mundo no vivido
 
     def ground(self, how):
         self.anchor[how] += 1
@@ -255,6 +261,16 @@ class Accumulator:
                 self.known_good += 1 if rec["chose_well"] else 0
         if rec["understood"]:
             self.understood += 1
+        if rec.get("comm_reward"):
+            self.coop_comm += 1
+        if rec.get("comp_reward"):
+            self.coop_comp += 1
+        if rec.get("comm_penalty"):
+            self.coop_penalty += 1
+        if rec.get("teach_reward"):
+            self.coop_teach += 1
+        if rec.get("testimony_reward"):
+            self.coop_testimony += 1
         if rec["chose_well"]:
             self.good += 1
         if rec["type"] == "forage":
@@ -294,6 +310,12 @@ class Accumulator:
             "anchor_shared": self.anchor.get("recuerdo compartido", 0) / max(1, self.past),
             "novel_success": self.novel_good / max(1, self.novel),
             "known_success": self.known_good / known,
+            # regimen cooperativo (fraccion de episodios)
+            "coop_comm_rate": self.coop_comm / e,
+            "coop_comp_rate": self.coop_comp / e,
+            "coop_penalty_rate": self.coop_penalty / e,
+            "coop_teach_rate": self.coop_teach / e,
+            "coop_testimony_rate": self.coop_testimony / e,
         }
 
 

@@ -170,6 +170,47 @@ class Config:
     predator_death_p_fled: float = 0.02
     predator_damage: float = 5.0     # si no huye y sobrevive
 
+    # --- regimen cooperativo (premio en ENERGIA, no en lexico) --------
+    #   ^ RELAJACION DELIBERADA DE LA REGLA 2, y conviene decir exactamente
+    #     que se relaja y que NO. La Regla 2 del proyecto es que el LEXICO
+    #     (que forma va con que categoria) jamas se refuerza con el pago:
+    #     solo por co-observacion. Eso sigue intacto — estos premios NO
+    #     tocan ningun peso de `lexicon.py`. Lo que hacen es dar o quitar
+    #     ENERGIA, que es fitness: alimenta la reproduccion y por tanto la
+    #     seleccion de la vigilancia. El lenguaje pasa a comprar
+    #     supervivencia tambien por entenderse bien, no solo por permitir
+    #     decidir sin percibir.
+    #
+    #     Consecuencia que hay que asumir: con esto encendido, el brazo
+    #     `language` de la ablacion cobra una ventaja energetica directa que
+    #     `mute`/`noise` no pueden replicar, asi que la ablacion dejaria de
+    #     ser limpia. Por eso `run.ablation` los fuerza a 0 y corre en modo
+    #     PURO. Aqui van encendidos porque el modelo por defecto es ahora el
+    #     regimen cooperativo; a 0 se ablacionan uno a uno.
+    #
+    #     CALIBRACION: estos cinco numeros deben quedar por debajo de
+    #     `metabolic_cost` (11.0) sumados sobre una generacion, y menores
+    #     que los pagos del mundo (±4..22). Si no, la economia se trivializa
+    #     y todos viven al tope. Son puntos de arranque, no verdades.
+    comm_reward: float = 0.15        # entenderse Y acertar: premio a AMBOS
+    #   ^ solo si la comprension fue CORRECTA y llevo a una buena decision.
+    #     Nunca por emitir señal: el brazo `noise` no genera comprension
+    #     correcta, asi que no cobra. Es «cuando se entienden, eso es bueno».
+    comm_penalty: float = 0.20       # hablar de algo importante y NO ser entendido
+    #   ^ al hablante, ademas de la penalizacion lexica que ya existia en
+    #     `_uptake_feedback`. Castiga la comunicacion fallida, no el silencio.
+    compression_reward: float = 0.10  # producir por COMPOSICION, no bloque opaco
+    #   ^ una señal compuesta reutiliza morfos (buena compresion); una
+    #     holistica memoriza la combinacion entera. Premia armar buenas
+    #     oraciones con piezas.
+    teach_reward: float = 1.0        # enseñar instalando un CONCEPTO nuevo
+    #   ^ el premio mas alto porque es lo mas raro y lo mas valioso: la
+    #     unica via del modelo que entrega un concepto (no solo un valor) al
+    #     que no lo tenia. Es la palanca de la transmision cultural, que el
+    #     proyecto hallo construida pero infrautilizada.
+    testimony_reward: float = 0.5    # dar por relato un dato del mundo no vivido
+    #   ^ cooperar para sobrevivir avisando de lo que el otro no ha visto.
+
     # --- decision -----------------------------------------------------
     p_explore: float = 0.45          # acercarse a lo desconocido (sin info)
     p_explore_against: float = 0.05  # acercarse pese a esperar algo malo
@@ -251,7 +292,13 @@ class Config:
     #     cultural no tenia nicho. Con vecindad, el saber se reparte por
     #     geografia. Prediccion: bajara la coherencia global (los juegos de
     #     nombres sobre retículas forman dominios) y apareceran dialectos.
-    p_nombrar_suceso: float = 0.0    # co-observacion de SUCESOS, no solo de cosas
+    p_nombrar_suceso: float = 0.4    # co-observacion de SUCESOS, no solo de cosas
+    #   ^ ENCENDIDO por defecto en el regimen cooperativo (antes 0.0). Es la
+    #     palanca documentada que mete los VERBOS en el circuito de
+    #     co-observacion que ya alinea los nombres: sin ella los morfos de
+    #     accion solo se refuerzan por el alineamiento interno y convergen
+    #     mucho peor que los nombres. Con un mundo mas rico en acciones,
+    #     alinear verbos es lo que da la clase «verbo» de verdad.
     #   ^ FASE 12. La asimetria que pone techo a la sintaxis compleja.
     #
     #     Medido: los nombres convergen a 0.488 y los verbos a 0.188
@@ -326,7 +373,11 @@ class Config:
     travel_scale: float = 6.0        # de distancia a coste energetico
 
     # --- mundo --------------------------------------------------------
-    world: str = "uqbar"             # fichero en worlds/ (o ruta a un json)
+    world: str = "uqbar_rico"        # fichero en worlds/ (o ruta a un json)
+    #   ^ POR DEFECTO el mundo enriquecido: mas familias (mas sustantivos) y
+    #     familias graduadas (mas adjetivos). Invalida la comparacion directa
+    #     con las tablas historicas de `uqbar`, que sigue disponible con
+    #     `--world uqbar`.
     contact: int = 0                 # encuentros entre tribus por generacion
     # Los dos siguientes los fija el cargador del mundo al arrancar; no se
     # tocan a mano. Estan aqui para que queden volcados con el resto de

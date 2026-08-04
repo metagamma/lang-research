@@ -22,6 +22,17 @@ recibido, solo con la co-observacion; y el valor nunca se aprende de
 oidas, solo por experiencia. Asi el lenguaje no puede "colarse" en la
 funcion de recompensa: su unica via de influir en la supervivencia es
 permitir decidir SIN percibir. Si aun asi ayuda, la ayuda es real.
+
+REGIMEN COOPERATIVO (Regla 2 relajada, y con cuidado)
+-----------------------------------------------------
+El modelo por defecto premia en ENERGIA entenderse, comprimir y enseñar
+(ver `config.py`, bloque «regimen cooperativo»). Eso NO toca ningun peso
+de `lexicon.py`: la separacion 2/3 de arriba sigue intacta. Lo que cambia
+es que el lenguaje pasa a comprar fitness tambien por comunicar bien, no
+solo por permitir decidir sin percibir. Es una presion SELECTIVA
+(energia -> reproduccion -> vigilancia), no telepatia lexica. La ablacion
+falsable se corre aparte, en modo puro (`run._pure`), con estos premios a
+cero.
 """
 
 import numpy as np
