@@ -624,6 +624,69 @@ def metaphor_experiment(cfg, n_tribes, generations, seeds, levels):
                   f"delta={cliffs_delta(xs, ys):+.2f}  ¿distinto? {sig}")
 
 
+def focal_experiment(cfg, n_tribes, generations, seeds, levels):
+    """¿Rompe un PUNTO FOCAL compartido el atractor 0.45 de la coherencia?
+
+    El techo de coherencia es un fallo de ruptura de simetria: en `produce`
+    el empate entre formas se rompe al azar y en cada cabeza, asi que ocho
+    agentes lanzando ocho monedas nunca convergen y un empate 3-3 no se
+    deshace. `focal_bias>0` da un criterio COMPARTIDO — la forma mas corta
+    entre las casi empatadas — que todos computan igual, de modo que el
+    empate cae del mismo lado en toda la banda sin ver la mayoria global.
+
+    La apuesta es doble y por eso se mide junto: la coherencia debe SUBIR
+    (IC95 sin 0) SIN que bajen los aciertos. Amplificar la mayoria a lo
+    bruto (social_exp alto) ya sube coherencia pero cuesta precision; el
+    punto focal solo desempata sinonimos de un mismo significado, asi que
+    no deberia. Mismo mundo y misma semilla; solo cambia `focal_bias`.
+    """
+    print(f"PUNTO FOCAL  —  {seeds} semillas x {len(levels)} niveles x "
+          f"{generations} generaciones\n")
+    arms = {}
+    for b in levels:
+        rows = []
+        for seed in range(1, seeds + 1):
+            c = Config(**cfg.to_dict())
+            c.focal_bias = b
+            recs, _ = simulate(MODE_LANGUAGE, seed, c, n_tribes,
+                               generations, metrics_every=5)
+            o = outcome(recs, generations)
+            tail = [r for r in recs if "coherence" in r][-3:]
+            rows.append({
+                "pop": o["pop"], "success": o["success"],
+                "coherence": mean([r["coherence"] for r in tail]),
+                "topsim": mean([r["topsim"] for r in tail]),
+                "composed": mean([r["lex_composed"] for r in tail]),
+            })
+        arms[b] = rows
+        print(f"  focal_bias={b:.2f}  pob={mean([r['pop'] for r in rows]):5.1f}  "
+              f"exito={mean([r['success'] for r in rows]):.3f}  "
+              f"coher={mean([r['coherence'] for r in rows]):.3f}  "
+              f"topsim={mean([r['topsim'] for r in rows]):+.3f}  "
+              f"compuesto={mean([r['composed'] for r in rows]):.3f}")
+
+    base = min(levels)
+    rng = random.Random(4243)
+    print("\n" + "=" * 72)
+    print(f"CONTRA focal_bias={base:.2f} (desempate al azar)")
+    print("=" * 72)
+    for key, label in [("coherence", "coherencia"), ("success", "aciertos"),
+                       ("topsim", "topsim"), ("composed", "composicionalidad")]:
+        print(f"\n  {label}")
+        for b in levels:
+            if b == base:
+                continue
+            xs = [r[key] for r in arms[b]]
+            ys = [r[key] for r in arms[base]]
+            obs, lo, hi = bootstrap_diff(xs, ys, rng, 4000)
+            sig = "SI" if (lo > 0 or hi < 0) else "no"
+            print(f"    b={b:.2f} - b={base:.2f} = {obs:+7.3f}  "
+                  f"IC95[{lo:+.3f}, {hi:+.3f}]  "
+                  f"delta={cliffs_delta(xs, ys):+.2f}  ¿distinto? {sig}")
+    print("\n  La apuesta gana si la COHERENCIA sube (IC95 sin 0) y los")
+    print("  ACIERTOS no bajan: romper la simetria sin coste de precision.")
+
+
 def bottleneck_experiment(cfg, n_tribes, generations, seeds, capacities):
     """Fase 5: ¿aprieta el cuello de botella a favor de la composicion?
 
@@ -821,6 +884,14 @@ def main(argv=None):
                    default=[0.0, 0.35, 0.7])
     _add_config_args(m, cfg)
 
+    fo = sub.add_parser("focal",
+                        help="¿rompe un punto focal compartido el atractor 0.45?")
+    fo.add_argument("--tribes", type=int, default=1)
+    fo.add_argument("--generations", type=int, default=80)
+    fo.add_argument("--seeds", type=int, default=8)
+    fo.add_argument("--levels", type=float, nargs="+", default=[0.0, 0.15, 0.30])
+    _add_config_args(fo, cfg)
+
     b = sub.add_parser("bottleneck",
                        help="Fase 5: ¿aprieta el cuello a favor de componer?")
     b.add_argument("--tribes", type=int, default=1)
@@ -931,6 +1002,9 @@ def main(argv=None):
     elif args.cmd == "metaphor":
         metaphor_experiment(cfg, args.tribes, args.generations, args.seeds,
                             sorted(args.levels))
+    elif args.cmd == "focal":
+        focal_experiment(cfg, args.tribes, args.generations, args.seeds,
+                         sorted(args.levels))
     elif args.cmd == "cooperate":
         cooperate_experiment(cfg, args.tribes, args.generations, args.seeds,
                              sorted(args.levels))

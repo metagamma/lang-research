@@ -50,6 +50,26 @@ class Config:
     #     veces — convierte una ventaja 3-2 en una señal detectable, y la
     #     realimentacion hace el resto. Es como se difunden las variantes
     #     de verdad: por numero de hablantes, no por frecuencia bruta.
+    focal_bias: float = 0.0          # margen de casi-empate en que gana el PUNTO FOCAL
+    #   ^ APAGADO por defecto, y por MEDICION. La hipotesis: el atractor 0.45
+    #     es un fallo de ruptura de simetria (el empate entre formas se rompe
+    #     al azar y por cabeza; ocho monedas independientes nunca convergen y
+    #     un 3-3 no se deshace, ver la nota de social_exp arriba). El arreglo
+    #     propuesto: entre las formas dentro del b% del lider gana un criterio
+    #     COMPARTIDO — la mas corta, y a igual longitud la primera por orden —
+    #     que todos computan igual, un punto de Schelling que rompe el empate
+    #     del mismo lado en toda la banda (la brevedad es la ley de Zipf).
+    #
+    #     No se gana su sitio. Medido con `focal` (8 semillas): la coherencia
+    #     NO sube (b=0.15: +0.009, IC95 con 0) y los aciertos bajan un poco
+    #     (-0.018, SI). Aislado apagando social_exp (6 semillas), es PEOR:
+    #     coher 0.453 -> 0.412. La causa, medida: «la forma mas corta» es un
+    #     sesgo ORTOGONAL a la mayoria — no rastrea que usa la banda, asi que
+    #     solo empuja hacia una propiedad arbitraria (la longitud) y pelea
+    #     contra el consenso emergente. El desempate nunca fue el cuello: lo
+    #     que falta es una señal de mayoria GLOBAL, y esa es justo social_exp
+    #     (difusion por hablantes distintos), ya en su optimo. El mecanismo se
+    #     queda documentado y ablacionable; a 0 es el modelo previo exacto.
     lex_prune: float = 0.05          # peso por debajo del cual se olvida
     lex_confidence: float = 0.55     # peso minimo para fiarse de lo que oyes
     pragmatica: float = 0.0          # cuanto pesa el contexto al desambiguar
