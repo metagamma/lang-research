@@ -91,6 +91,7 @@ def simulate(mode, seed, cfg, n_tribes, generations, metrics_every=5,
         rec["deaths_total"] = sum(pop.deaths().values())
         rec["kappa"] = channel.regime.kappa
         rec["dyn_setpoint"] = channel.regime.setpoint
+        rec["dyn_index"] = channel.regime.index
         rec["maturity"] = channel.regime.mu
 
         last = (gen == generations)
@@ -174,12 +175,13 @@ def report(records, state, cfg, n_tribes):
     dyn_on = cfg.dyn_control or cfg.dyn_select or cfg.info_reward
     kappas = [r.get("kappa", 1.0) for r in records]
     print(f"\n  DINAMISMO  " + ("(ACTIVO)" if dyn_on else "(APAGADO)"))
+    print(f"    indice de emergencia (compr+coher+compos)  {last.get('dyn_index', 0.0):.3f}")
+    print(f"    setpoint (frontera aspiracional)           {last.get('dyn_setpoint', 0.0):.3f}")
     print(f"    kappa (ganancia del premio)  final {last.get('kappa', 1.0):.2f}"
           f"   rango [{min(kappas):.2f}, {max(kappas):.2f}]")
     print(f"    madurez de la lengua         {last.get('maturity', 0.0):.2f}")
-    print(f"    setpoint (diana de comprension) {last.get('dyn_setpoint', 0.0):.3f}")
-    print("    kappa sube cuando la comprension se estanca y baja al")
-    print("    alcanzar su frontera: el premio se ajusta solo.")
+    print("    El lazo persigue el INDICE COMPUESTO, no una sola metrica:")
+    print("    kappa sube cuando el conjunto se estanca y baja al remontar.")
 
     # --- como nombra cada tribu el mundo ---
     print("\n" + line)

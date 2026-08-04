@@ -359,13 +359,25 @@ class Population:
         for t in self.tribes:
             births += t.step(world, channel, rng, acc, gen)
         self.contact_round(world, channel, rng, acc, gen)
-        # CONTROLADOR (Capa 2). Cerrado el episodio, se lee la comprension
-        # de esta generacion (barata, ya contada) y se ajusta kappa para la
-        # siguiente: la presion persigue la mejor comprension vista.
+        # CONTROLADOR (Capa 2). Cerrado el episodio se calcula el INDICE
+        # COMPUESTO DE EMERGENCIA de esta generacion y se ajusta kappa para
+        # la siguiente: la presion persigue la mejor frontera vista del
+        # conjunto, no de una sola metrica.
+        #
+        # Las tres cosas que definen que hay lengua, con proxies BARATOS que
+        # el acumulador ya lleva (el controlador corre cada generacion; la
+        # coherencia y el topsim reales son caros y solo se miden cada pocas):
+        #   comprension    entenderse y acertar   (coop_comm / episodios)
+        #   coherencia     compartir convenciones (understood / señales)
+        #   composicion    armar por partes       (parsed 'comp' / señales)
         reg = getattr(channel, "regime", None)
         if reg is not None:
-            rate = acc.coop_comm / max(1, acc.episodes)
-            reg.update(rate)
+            e = max(1, acc.episodes)
+            sig = max(1, acc.signals)
+            comprension = acc.coop_comm / e
+            coherencia = acc.understood / sig
+            composicion = acc.parsed.get("comp", 0) / sig
+            reg.update((comprension + coherencia + composicion) / 3.0)
         return acc, births
 
     # -- resumenes -----------------------------------------------------

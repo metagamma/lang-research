@@ -44,9 +44,10 @@ class Regime:
     def __init__(self, cfg):
         self.cfg = cfg
         self.kappa = 1.0            # ganancia global sobre los premios
-        self.best = 0.0            # mejor comprension vista (rolling max)
+        self.best = 0.0            # mejor INDICE de emergencia visto (rolling max)
         self.setpoint = 0.0        # diana actual del controlador
-        self.mu = 0.0              # madurez de la lengua (EWMA de comprension)
+        self.mu = 0.0              # madurez de la lengua (EWMA del indice)
+        self.index = 0.0           # ultimo indice compuesto de emergencia
 
     # -- lectura desde los episodios -----------------------------------
     def _mature(self, base_comp, base_teach):
@@ -86,34 +87,40 @@ class Regime:
         return self.cfg.testimony_reward * self.kappa
 
     # -- actualizacion por el controlador ------------------------------
-    def update(self, rate):
+    def update(self, index):
         """Cierra el lazo: ajusta kappa hacia el setpoint aspiracional.
 
-        `rate` es una señal barata de comprension (fraccion de episodios en
-        que se entendieron y acertaron), leida cada generacion. El setpoint
-        persigue el mejor valor visto por `dyn_aspiration`, asi que:
+        `index` es el INDICE COMPUESTO DE EMERGENCIA — comprension +
+        coherencia + composicionalidad, promediado — que la poblacion
+        alcanzo esta generacion. El controlador no persigue una sola
+        metrica sino el conjunto de las tres cosas que definen que hay
+        lengua: que se entiendan, que compartan convenciones y que compongan.
 
-          - si la comprension esta por debajo de su frontera -> kappa sube
-          - si la alcanza o la supera                        -> kappa baja
+        El setpoint persigue el MEJOR indice visto por `dyn_aspiration`, asi
+        que:
+
+          - si el indice esta por debajo de su frontera -> kappa sube
+          - si la alcanza o la supera                    -> kappa baja
 
         kappa queda clampado para que el lazo no se dispare. Con
         `dyn_control=0` el controlador se apaga y kappa se queda en 1.0.
         """
         cfg = self.cfg
-        # madurez: EWMA de la comprension, para el curriculum (Capa 4)
-        self.mu = 0.8 * self.mu + 0.2 * rate
+        self.index = index
+        # madurez: EWMA del indice, para el curriculum (Capa 4)
+        self.mu = 0.8 * self.mu + 0.2 * index
         if not cfg.dyn_control:
-            self.setpoint = rate
+            self.setpoint = index
             return self.kappa
-        self.best = max(self.best, rate)
+        self.best = max(self.best, index)
         self.setpoint = self.best * cfg.dyn_aspiration
-        err = self.setpoint - rate
+        err = self.setpoint - index
         # Empuje proporcional al deficit MENOS una FUGA hacia 1.0. Sin la
         # fuga el lazo satura: como la diana aspiracional va siempre por
         # encima del mejor valor, el error nunca se anula y kappa treparia
         # hasta el techo y se quedaria pegado — que no es dinamico, es
         # maximo constante. Con la fuga hay equilibrio: kappa se asienta
-        # donde `η·err = leak·(kappa−1)`, alto cuando la comprension flojea,
+        # donde `η·err = leak·(kappa−1)`, alto cuando el indice flojea,
         # de vuelta a 1 cuando remonta.
         leak = 0.5 * cfg.dyn_control
         self.kappa += cfg.dyn_control * err - leak * (self.kappa - 1.0)
