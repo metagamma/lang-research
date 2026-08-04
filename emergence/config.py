@@ -225,13 +225,33 @@ class Config:
     #     `language` de la ablacion cobra una ventaja energetica directa que
     #     `mute`/`noise` no pueden replicar, asi que la ablacion dejaria de
     #     ser limpia. Por eso `run.ablation` los fuerza a 0 y corre en modo
-    #     PURO. Aqui van encendidos porque el modelo por defecto es ahora el
-    #     regimen cooperativo; a 0 se ablacionan uno a uno.
+    #     PURO.
+    #
+    #     ENCENDIDO por defecto — pero por una razon SUTIL y medida. Solo,
+    #     este regimen es inerte: premiar en energia el entenderse no supera
+    #     al control puro (`cooperate`/`dynamic`, todos los IC95 con 0). Lo
+    #     que NO es inerte es su INTERACCION con el colapso lexico
+    #     (`lex_collapse`): son SINERGICOS. Medido con comparacion pareada
+    #     (10 semillas, solo cambia este interruptor), el colapso rompe el
+    #     atractor 0.45 SOLO con el regimen encendido —
+    #       regimen ON : coherencia +0.066 (SI), topsim +0.060 (SI)
+    #       regimen OFF: coherencia +0.019 (no), topsim -0.034 (no)
+    #     El premio construye convenciones compartidas por via demografica
+    #     (quien se entiende se reproduce); el colapso las condensa una vez
+    #     asentadas. Ninguno mueve el techo solo; juntos si. Por eso va ON:
+    #     es la mitad de la palanca de la emergencia, no un adorno.
     #
     #     CALIBRACION: estos cinco numeros deben quedar por debajo de
     #     `metabolic_cost` (11.0) sumados sobre una generacion, y menores
     #     que los pagos del mundo (±4..22). Si no, la economia se trivializa
     #     y todos viven al tope. Son puntos de arranque, no verdades.
+    cooperative: bool = True         # INTERRUPTOR MAESTRO del regimen de premio
+    #   ^ True = se aplican los premios de abajo, modulados por el lazo de
+    #     `regime.py` (el modelo por defecto: la mitad de la combinacion
+    #     ganadora con `lex_collapse`). False = todo el regimen y el dinamismo
+    #     quedan inertes, para ablacionarlo limpio: `run._pure` y la ablacion
+    #     lo apagan, y los experimentos `cooperate`/`dynamic` lo encienden
+    #     explicitamente. Los valores de abajo son la BASE cuando esta ON.
     comm_reward: float = 0.15        # entenderse Y acertar: premio a AMBOS
     #   ^ solo si la comprension fue CORRECTA y llevo a una buena decision.
     #     Nunca por emitir señal: el brazo `noise` no genera comprension

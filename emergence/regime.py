@@ -63,8 +63,15 @@ class Regime:
         w = (1.0 - c) + c * self.mu
         return base_comp * w, base_teach * w
 
+    # INTERRUPTOR MAESTRO. `cooperative=True` por defecto: el regimen es la
+    # mitad de la combinacion ganadora (sinergico con `lex_collapse`, ver la
+    # nota en config.py). Con `cooperative=False` todos los premios quedan a 0
+    # y el regimen entero se ablaciona limpio — lo que hacen `run._pure` y la
+    # ablacion falsable.
     def comm(self, info=1.0):
         """Premio efectivo de comprension mutua, ponderado por informacion."""
+        if not self.cfg.cooperative:
+            return 0.0
         w = 1.0
         if self.cfg.info_reward:
             # info in [0,1]: cuanto decidio el mensaje. Mezcla con un piso
@@ -73,17 +80,25 @@ class Regime:
         return self.cfg.comm_reward * self.kappa * w
 
     def penalty(self):
+        if not self.cfg.cooperative:
+            return 0.0
         return self.cfg.comm_penalty * self.kappa
 
     def compression(self):
+        if not self.cfg.cooperative:
+            return 0.0
         comp, _ = self._mature(self.cfg.compression_reward, self.cfg.teach_reward)
         return comp * self.kappa
 
     def teach(self):
+        if not self.cfg.cooperative:
+            return 0.0
         _, teach = self._mature(self.cfg.compression_reward, self.cfg.teach_reward)
         return teach * self.kappa
 
     def testimony(self):
+        if not self.cfg.cooperative:
+            return 0.0
         return self.cfg.testimony_reward * self.kappa
 
     # -- actualizacion por el controlador ------------------------------

@@ -138,7 +138,7 @@ class Tribe:
         # seleccion de fitness (no toca el lexico), pero relativa — lo que
         # hace que el premio muerda aunque todos esten al tope de energia.
         cand = self.agents
-        if cfg.dyn_select:
+        if cfg.cooperative and cfg.dyn_select:
             cand = sorted(self.agents, key=lambda a: -a.comm_score)
         for a in cand:
             if len(self.agents) + len(newborns) >= cfg.max_pop:
@@ -371,7 +371,7 @@ class Population:
         #   coherencia     compartir convenciones (understood / señales)
         #   composicion    armar por partes       (parsed 'comp' / señales)
         reg = getattr(channel, "regime", None)
-        if reg is not None:
+        if reg is not None and self.cfg.cooperative:
             e = max(1, acc.episodes)
             sig = max(1, acc.signals)
             comprension = acc.coop_comm / e

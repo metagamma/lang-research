@@ -172,7 +172,7 @@ def report(records, state, cfg, n_tribes):
     print(f"  testimonio util (dato no vivido)       {last.get('coop_testimony_rate', 0):.3f}")
     print("    (fraccion de episodios; el premio es de energia = fitness,")
     print("     nunca de pesos lexicos: la Regla 2 sigue en pie)")
-    dyn_on = cfg.dyn_control or cfg.dyn_select or cfg.info_reward
+    dyn_on = cfg.cooperative and (cfg.dyn_control or cfg.dyn_select or cfg.info_reward)
     kappas = [r.get("kappa", 1.0) for r in records]
     print(f"\n  DINAMISMO  " + ("(ACTIVO)" if dyn_on else "(APAGADO)"))
     print(f"    indice de emergencia (compr+coher+compos)  {last.get('dyn_index', 0.0):.3f}")
@@ -364,6 +364,7 @@ def _pure(cfg):
     unico canal del lenguaje hacia la supervivencia es decidir sin percibir.
     """
     c = Config(**cfg.to_dict())
+    c.cooperative = False
     for p in COOP_PARAMS + DYN_TOGGLES:
         setattr(c, p, 0.0)
     return c
@@ -447,6 +448,7 @@ def cooperate_experiment(cfg, n_tribes, generations, seeds, levels):
         rows = []
         for seed in range(1, seeds + 1):
             c = Config(**cfg.to_dict())
+            c.cooperative = True   # el experimento enciende el regimen para medirlo
             for p in COOP_PARAMS:
                 setattr(c, p, base[p] * lv)
             recs, state = simulate(MODE_LANGUAGE, seed, c, n_tribes,
@@ -521,6 +523,7 @@ def dynamic_experiment(cfg, n_tribes, generations, seeds):
         rows = []
         for seed in range(1, seeds + 1):
             c = Config(**cfg.to_dict())
+            c.cooperative = True   # ambos brazos con el regimen encendido; difieren en el lazo
             for p in apagar:
                 setattr(c, p, 0.0)
             recs, _ = simulate(MODE_LANGUAGE, seed, c, n_tribes, generations,
