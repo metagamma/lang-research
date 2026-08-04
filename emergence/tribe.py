@@ -132,7 +132,15 @@ class Tribe:
     def reproduce(self, rng):
         cfg = self.cfg
         newborns = []
-        for a in self.agents:
+        # SELECCION COMPETITIVA (Capa 3). Con la banda llena las plazas son
+        # escasas: quien se reproduce lo decide la competencia comunicativa,
+        # no el orden de la lista. Los mejores comunicadores primero. Es
+        # seleccion de fitness (no toca el lexico), pero relativa — lo que
+        # hace que el premio muerda aunque todos esten al tope de energia.
+        cand = self.agents
+        if cfg.dyn_select:
+            cand = sorted(self.agents, key=lambda a: -a.comm_score)
+        for a in cand:
             if len(self.agents) + len(newborns) >= cfg.max_pop:
                 break
             if a.energy >= cfg.repro_threshold:
@@ -351,6 +359,13 @@ class Population:
         for t in self.tribes:
             births += t.step(world, channel, rng, acc, gen)
         self.contact_round(world, channel, rng, acc, gen)
+        # CONTROLADOR (Capa 2). Cerrado el episodio, se lee la comprension
+        # de esta generacion (barata, ya contada) y se ajusta kappa para la
+        # siguiente: la presion persigue la mejor comprension vista.
+        reg = getattr(channel, "regime", None)
+        if reg is not None:
+            rate = acc.coop_comm / max(1, acc.episodes)
+            reg.update(rate)
         return acc, births
 
     # -- resumenes -----------------------------------------------------

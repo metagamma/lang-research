@@ -211,6 +211,43 @@ class Config:
     testimony_reward: float = 0.5    # dar por relato un dato del mundo no vivido
     #   ^ cooperar para sobrevivir avisando de lo que el otro no ha visto.
 
+    # --- dinamismo del premio (lazo cerrado, ver regime.py) -----------
+    #   ^ los premios de arriba son la BASE; el dinamismo los modula sin
+    #     tocar ningun peso lexico (sigue siendo canal de energia). Cada
+    #     parametro a 0 apaga su capa, y `run._pure` los apaga todos para
+    #     la ablacion. La idea: que el sistema se ajuste SOLO a premiar la
+    #     comprension y la emergencia del lenguaje, en vez de constantes.
+    dyn_control: float = 0.6         # ganancia η del controlador de kappa
+    #   ^ 0 = kappa fija en 1.0 (premio estatico). >0 = lazo cerrado: cada
+    #     generacion kappa se mueve hacia un setpoint aspiracional que
+    #     persigue la mejor comprension vista. Si oscila, bajarlo.
+    dyn_kappa_min: float = 0.25      # suelo de la ganancia global
+    dyn_kappa_max: float = 4.0       # techo de la ganancia global
+    #   ^ clamp del lazo: sin el, un error sostenido dispararia kappa.
+    dyn_aspiration: float = 1.08     # cuanto por encima del mejor valor se apunta
+    #   ^ la diana va un 8% por encima de la frontera vista: siempre queda
+    #     algo por mejorar, asi la presion no se apaga al converger. Muy
+    #     alto vuelve el premio insaciable; a 1.0 apunta justo a la frontera.
+    info_reward: float = 0.7         # peso de la ponderacion por INFORMACION
+    #   ^ Capa 1. 0 = premio de comprension plano. 1 = todo el premio depende
+    #     de lo decisivo que fue el mensaje (lo que habia EN JUEGO en la
+    #     decision: |payoff - coste de viaje|). 0.7 deja un piso: entenderse
+    #     siempre paga algo, pero avisar de algo que de verdad cambia la
+    #     decision paga mucho mas.
+    info_scale: float = 10.0         # a partir de que apuesta la info vale 1.0
+    #   ^ |payoff - viaje| por encima de esto se considera maxima informacion.
+    #     Escala lo que hay en juego a [0,1]. Puro numero de calibracion.
+    dyn_select: float = 1.0          # fuerza de la seleccion competitiva
+    #   ^ Capa 3. 0 = reproduccion en el orden actual. >0 = los mejores
+    #     comunicadores (comm_score) se reproducen primero cuando las plazas
+    #     escasean. Es lo que hace que el premio MUERDA con la banda llena:
+    #     seleccion frecuencia-dependiente, no energia absoluta. Sigue siendo
+    #     fitness (no lexico).
+    dyn_curriculum: float = 0.5      # cuanto pesa la madurez de la lengua
+    #   ^ Capa 4. 0 = se premia todo por igual siempre. >0 = con lengua
+    #     inmadura pesa entenderse a secas; segun madura, suben compresion y
+    #     enseñanza (comprimir solo tiene sentido cuando ya hay piezas).
+
     # --- decision -----------------------------------------------------
     p_explore: float = 0.45          # acercarse a lo desconocido (sin info)
     p_explore_against: float = 0.05  # acercarse pese a esperar algo malo

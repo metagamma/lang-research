@@ -131,6 +131,19 @@ def _nombrar_suceso(a, b, act, cfg):
     return True
 
 
+def _regime(channel, cfg):
+    """El regimen dinamico de esta corrida, o uno estatico de respaldo.
+
+    Se cuelga de `channel.regime` en `simulate`; el respaldo cubre cualquier
+    ruta que construya un Channel sin regimen (compatibilidad).
+    """
+    reg = getattr(channel, "regime", None)
+    if reg is None:
+        from .regime import Regime
+        reg = channel.regime = Regime(cfg)
+    return reg
+
+
 def _kin_payback(speaker, listener_delta, listener_died, cfg):
     d = cfg.kin_share * listener_delta
     if listener_died:
@@ -221,11 +234,12 @@ def forage_episode(world, speaker, listener, channel, cfg, rng, gen, acc):
         rec["novel"] = not speaker.gram.knows_whole(msg)
     form, how = channel.transmit(speaker, msg) if msg else (None, None)
     rec["_meaning"] = msg          # para poder glosar la oracion
+    reg = _regime(channel, cfg)
     # COMPRESION (regimen cooperativo): armar la señal por composicion,
     # reutilizando morfos, en vez de memorizar la combinacion entera como
-    # bloque opaco. Premio de energia, no de lexico.
+    # bloque opaco. Premio de energia (dinamico via kappa/madurez), no lexico.
     if channel.mode == MODE_LANGUAGE and how == COMPOSED:
-        speaker.gain(cfg.compression_reward)
+        speaker.gain(reg.compression())
         rec["comp_reward"] = True
 
     # Si no se fia de su palabra, DESCRIBE en vez de nombrar. Es lo que
@@ -328,11 +342,18 @@ def forage_episode(world, speaker, listener, channel, cfg, rng, gen, acc):
     # entendio y ademas fallo, se castiga al hablante. Todo en energia.
     if channel.mode == MODE_LANGUAGE:
         if cat_heard is not None and rec["chose_well"]:
-            speaker.gain(cfg.comm_reward)
-            listener.gain(cfg.comm_reward)
+            # INFORMACION (Capa 1): el premio escala con lo que habia EN
+            # JUEGO en la decision. Avisar de un veneno o de un buen forraje
+            # lejano paga; confirmar una piedra inerte, casi nada.
+            info = min(1.0, abs(thing.payoff - thing.travel) / cfg.info_scale)
+            r = reg.comm(info)
+            speaker.gain(r)
+            listener.gain(r)
+            speaker.comm_score += info
+            listener.comm_score += info
             rec["comm_reward"] = True
         elif form and cat_heard is None and not rec["chose_well"]:
-            speaker.gain(-cfg.comm_penalty)
+            speaker.gain(-reg.penalty())
             rec["comm_penalty"] = True
 
     py = listener.perceive(thing)
@@ -386,10 +407,11 @@ def forage_episode(world, speaker, listener, channel, cfg, rng, gen, acc):
     #   - un relato que enseña algo del mundo que el oyente no vivio.
     if channel.mode == MODE_LANGUAGE:
         if rec.get("concepto_nuevo") or rec.get("aprendida"):
-            speaker.gain(cfg.teach_reward)
+            speaker.gain(reg.teach())
+            speaker.comm_score += 1.0
             rec["teach_reward"] = True
         if rec.get("testimony"):
-            speaker.gain(cfg.testimony_reward)
+            speaker.gain(reg.testimony())
             rec["testimony_reward"] = True
 
     return rec
@@ -422,12 +444,13 @@ def alarm_episode(world, speaker, listener, channel, cfg, rng, gen, acc):
     px = speaker.perceive(thing)
     cat_s = speaker.concepts.categorize(px)
     msg = (MATO, cat_s, None, thing.place, NOW)
+    reg = _regime(channel, cfg)
     if speaker.wants_to_speak(cat_s):
         rec["novel"] = not speaker.gram.knows_whole(msg)
         form, how = channel.transmit(speaker, msg)
         rec["_meaning"] = msg
         if channel.mode == MODE_LANGUAGE and how == COMPOSED:
-            speaker.gain(cfg.compression_reward)
+            speaker.gain(reg.compression())
             rec["comp_reward"] = True
     else:
         form, how = None, None
@@ -454,11 +477,17 @@ def alarm_episode(world, speaker, listener, channel, cfg, rng, gen, acc):
     # si aviso y el oyente no lo entendio ni huyo.
     if channel.mode == MODE_LANGUAGE:
         if cat_heard is not None and fled:
-            speaker.gain(cfg.comm_reward)
-            listener.gain(cfg.comm_reward)
+            # una alarma bien entendida siempre esta en juego la vida: la
+            # informacion es maxima (evitar al depredador).
+            info = min(1.0, cfg.predator_damage / cfg.info_scale)
+            r = reg.comm(info)
+            speaker.gain(r)
+            listener.gain(r)
+            speaker.comm_score += info
+            listener.comm_score += info
             rec["comm_reward"] = True
         elif form and cat_heard is None and not fled:
-            speaker.gain(-cfg.comm_penalty)
+            speaker.gain(-reg.penalty())
             rec["comm_penalty"] = True
 
     py = listener.perceive(thing)

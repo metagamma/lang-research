@@ -76,6 +76,8 @@ def simulate(mode, seed, cfg, n_tribes, generations, metrics_every=5,
     world = World(rng_world, spec)
     probes = world.probe_set(rng_probe, per_kind=10)
     channel = Channel(mode, cfg, rng_channel)
+    from .regime import Regime
+    channel.regime = Regime(cfg)   # lazo dinamico del premio (Capa 2)
     pop = Population(n_tribes, cfg, rng_agents)
 
     records = []
@@ -87,6 +89,9 @@ def simulate(mode, seed, cfg, n_tribes, generations, metrics_every=5,
         rec.update(summ)
         rec.update(acc.rates())
         rec["deaths_total"] = sum(pop.deaths().values())
+        rec["kappa"] = channel.regime.kappa
+        rec["dyn_setpoint"] = channel.regime.setpoint
+        rec["maturity"] = channel.regime.mu
 
         last = (gen == generations)
         if metrics_every and (gen % metrics_every == 0 or last or gen == 1):
@@ -166,6 +171,15 @@ def report(records, state, cfg, n_tribes):
     print(f"  testimonio util (dato no vivido)       {last.get('coop_testimony_rate', 0):.3f}")
     print("    (fraccion de episodios; el premio es de energia = fitness,")
     print("     nunca de pesos lexicos: la Regla 2 sigue en pie)")
+    dyn_on = cfg.dyn_control or cfg.dyn_select or cfg.info_reward
+    kappas = [r.get("kappa", 1.0) for r in records]
+    print(f"\n  DINAMISMO  " + ("(ACTIVO)" if dyn_on else "(APAGADO)"))
+    print(f"    kappa (ganancia del premio)  final {last.get('kappa', 1.0):.2f}"
+          f"   rango [{min(kappas):.2f}, {max(kappas):.2f}]")
+    print(f"    madurez de la lengua         {last.get('maturity', 0.0):.2f}")
+    print(f"    setpoint (diana de comprension) {last.get('dyn_setpoint', 0.0):.3f}")
+    print("    kappa sube cuando la comprension se estanca y baja al")
+    print("    alcanzar su frontera: el premio se ajusta solo.")
 
     # --- como nombra cada tribu el mundo ---
     print("\n" + line)
@@ -333,6 +347,9 @@ def outcome(records, generations):
 
 COOP_PARAMS = ("comm_reward", "comm_penalty", "compression_reward",
                "teach_reward", "testimony_reward")
+# Interruptores del dinamismo: se apagan tambien en modo puro para que la
+# ablacion no reordene la reproduccion ni module los (ya nulos) premios.
+DYN_TOGGLES = ("dyn_control", "dyn_select", "info_reward", "dyn_curriculum")
 
 
 def _pure(cfg):
@@ -345,7 +362,7 @@ def _pure(cfg):
     unico canal del lenguaje hacia la supervivencia es decidir sin percibir.
     """
     c = Config(**cfg.to_dict())
-    for p in COOP_PARAMS:
+    for p in COOP_PARAMS + DYN_TOGGLES:
         setattr(c, p, 0.0)
     return c
 
@@ -477,6 +494,73 @@ def cooperate_experiment(cfg, n_tribes, generations, seeds, levels):
     print("\n  El premio es de ENERGIA (fitness), nunca de pesos lexicos: la")
     print("  Regla 2 sigue en pie. Lo que se mide es si esa presion selectiva")
     print("  hacia entenderse mejora la lengua, o solo engorda a los agentes.")
+
+
+def dynamic_experiment(cfg, n_tribes, generations, seeds):
+    """¿El premio DINAMICO se gana su sitio frente al estatico?
+
+    Dos brazos, mismo mundo y semilla:
+
+      estatico   kappa fija, premio plano, sin seleccion competitiva
+                 (dyn_control=dyn_select=info_reward=dyn_curriculum=0)
+      dinamico   el lazo cerrado por defecto: kappa persigue la frontera de
+                 comprension, el premio escala con la informacion, y los
+                 mejores comunicadores se reproducen primero.
+
+    La hipotesis: dejar que el sistema AJUSTE la presion hacia la
+    comprension deberia mover la comprension/coherencia/composicionalidad
+    mas que un premio fijo — que se midio casi inerte. Puede fallar: si el
+    lazo no mueve nada, el dinamismo no se gana el sitio.
+    """
+    print(f"PREMIO DINAMICO  —  {seeds} semillas x 2 brazos x "
+          f"{generations} generaciones\n")
+    brazos = {}
+    for nombre, apagar in (("estatico", DYN_TOGGLES), ("dinamico", ())):
+        rows = []
+        for seed in range(1, seeds + 1):
+            c = Config(**cfg.to_dict())
+            for p in apagar:
+                setattr(c, p, 0.0)
+            recs, _ = simulate(MODE_LANGUAGE, seed, c, n_tribes, generations,
+                               metrics_every=5)
+            o = outcome(recs, generations)
+            tail = [r for r in recs if "coherence" in r][-3:]
+            span = recs[-25:]
+            ks = [r.get("kappa", 1.0) for r in recs]
+            rows.append({
+                "success": o["success"],
+                "coherence": mean([r["coherence"] for r in tail]),
+                "topsim": mean([r["topsim"] for r in tail]),
+                "understood": mean([r["understood_rate"] for r in span]),
+                "testimony": mean([r["testimony_rate"] for r in span]),
+                "kappa_max": max(ks), "kappa_final": ks[-1],
+            })
+        brazos[nombre] = rows
+        print(f"  {nombre:<9} exito={mean([r['success'] for r in rows]):.3f}  "
+              f"coher={mean([r['coherence'] for r in rows]):.3f}  "
+              f"topsim={mean([r['topsim'] for r in rows]):+.3f}  "
+              f"comprension={mean([r['understood'] for r in rows]):.3f}  "
+              f"testimonio={mean([r['testimony'] for r in rows]):.3f}  "
+              f"kappa[fin={mean([r['kappa_final'] for r in rows]):.2f} "
+              f"max={mean([r['kappa_max'] for r in rows]):.2f}]")
+
+    rng = random.Random(4246)
+    print("\n" + "=" * 72)
+    print("DINAMICO - ESTATICO")
+    print("=" * 72)
+    for key, label in [("understood", "comprension"), ("success", "aciertos"),
+                       ("coherence", "coherencia"),
+                       ("topsim", "composicionalidad"),
+                       ("testimony", "transmision cultural")]:
+        xs = [r[key] for r in brazos["dinamico"]]
+        ys = [r[key] for r in brazos["estatico"]]
+        obs, lo, hi = bootstrap_diff(xs, ys, rng, 4000)
+        sig = "SI" if (lo > 0 or hi < 0) else "no"
+        print(f"  {label:<22} {obs:+7.3f}  IC95[{lo:+.3f}, {hi:+.3f}]  "
+              f"delta={cliffs_delta(xs, ys):+.2f}  ¿distinto? {sig}")
+
+    print("\n  Si el brazo dinamico no supera al estatico, el lazo no se gana")
+    print("  el sitio. El premio sigue siendo de energia: la Regla 2 no se toca.")
 
 
 # ---------------------------------------------------------------------
@@ -795,6 +879,13 @@ def main(argv=None):
                     help="multiplicador de los premios cooperativos (0 = puro)")
     _add_config_args(co, cfg)
 
+    dy = sub.add_parser("dynamic",
+                        help="¿el premio dinamico supera al estatico?")
+    dy.add_argument("--tribes", type=int, default=1)
+    dy.add_argument("--generations", type=int, default=80)
+    dy.add_argument("--seeds", type=int, default=8)
+    _add_config_args(dy, cfg)
+
     a = sub.add_parser("ablation", help="el experimento")
     a.add_argument("--tribes", type=int, default=1)
     a.add_argument("--generations", type=int, default=80)
@@ -841,6 +932,8 @@ def main(argv=None):
     elif args.cmd == "cooperate":
         cooperate_experiment(cfg, args.tribes, args.generations, args.seeds,
                              sorted(args.levels))
+    elif args.cmd == "dynamic":
+        dynamic_experiment(cfg, args.tribes, args.generations, args.seeds)
     else:
         ablation(cfg, args.tribes, args.generations, args.seeds, args.out)
     return 0

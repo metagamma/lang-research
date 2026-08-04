@@ -92,6 +92,11 @@ class Agent:
         # ha visto -- sabe que en un `mato` el peligro esta en la primera
         # posicion porque lo ha comprobado, no porque se lo hayan dicho.
         self.role_value = {}   # (accion, papel) -> EWMA del delta observado
+        # competencia comunicativa acumulada: cuantas veces este agente
+        # cobro premio por entenderse o enseñar. La seleccion competitiva
+        # (Capa 3) reproduce antes a quien mas comunica. Nace en 0: no se
+        # hereda, se gana viviendo — igual que la lengua.
+        self.comm_score = 0.0
 
     # -- percepcion ------------------------------------------------------
     def perceive(self, thing):
